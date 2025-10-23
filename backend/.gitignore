@@ -1,0 +1,77 @@
+# =========================
+# Visual Studio / .NET
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.userprefs
+
+# Build output
+bin/
+obj/
+out/
+**/bin/
+**/obj/
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+# SourceLink build outputs
+*.sourcelink.json
+
+# OpenAPI generated under obj
+/obj/EndpointInfo/
+/obj/*.OpenApiFiles.cache
+
+# NuGet pakker
+*.nupkg
+packages/
+.paket/
+paket-files/
+
+# Rider / JetBrains IDE
+.idea/
+*.sln.iml
+
+# Logs
+*.log
+
+# Backup & temporary
+*.bak
+*.tmp
+*.temp
+
+# Coverage / test output
+coverage/
+*.coverage
+*.coveragexml
+
+# OS-filer
+.DS_Store
+Thumbs.db
+
+# Autogenererede filer fra tools
+Generated_Code/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+
+# Transient caches
+.cache
+.dswa.cache.json
+.rjsm.cache.json
+
+# =========================
+# Appsettings / Secret files
+# =========================
+# Ignore appsettings.json and environment-specific versions
+**/appsettings.json
+**/appsettings.*.json
