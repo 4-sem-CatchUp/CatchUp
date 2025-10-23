@@ -1,0 +1,139 @@
+name: CatchUp CI (Frontend & Backend)
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  detect_changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  # --- FRONTEND TESTS ---
+  frontend_tests:
+    name: Frontend CI (React + Tailwind)
+    needs: detect_changes
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: CatchUp/frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: CatchUp/frontend
+        run: npm test -- --watchAll=false
+
+  # --- BACKEND TESTS ---
+  backend_tests:
+    name: Backend CI (.NET)
+    needs: detect_changes
+    if: needs.detect_changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # Cache NuGet packages
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Restore dependencies
+      - name: Restore dependencies
+        working-directory: CatchUp/backend
+        run: dotnet restore CatchUp.Social.sln
+
+      # Restore local dotnet tools
+      - name: Restore dotnet tools
+        working-directory: CatchUp/backend
+        run: dotnet tool restore
+
+      # Build
+      - name: Build solution
+        working-directory: CatchUp/backend
+        run: dotnet build CatchUp.Social.sln --configuration Release
+
+      # Check formatting
+      - name: Check formatting with CSharpier
+        working-directory: CatchUp/backend
+        run: dotnet csharpier check .
+
+      - name: Run linting (dotnet format)
+        working-directory: CatchUp/backend
+        run: dotnet format --verify-no-changes --severity error
+
+      # Run unit tests
+      - name: Run unit tests with coverage
+        working-directory: CatchUp/backend
+        run: |
+          dotnet test Social.CoreTests/SocialCoreTests.csproj \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --logger "trx;LogFileName=test_results.trx" \
+            --verbosity normal
+        continue-on-error: true
+
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: CatchUp/backend/TestResults/**/*.trx
+
+      # Generate coverage report
+      - name: Generate coverage report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
+        with:
+          reports: 'CatchUp/backend/TestResults/**/coverage.cobertura.xml'
+          targetdir: 'coveragereport'
+          reporttypes: 'HtmlInline_AzurePipelines_Dark'
+          classfilters: '-Social.Program;-Social.Migrations*'
+          filefilters: '-**/Middleware/*'
+
+      # Upload coverage report
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coveragereport
