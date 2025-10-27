@@ -1,13 +1,13 @@
-﻿using NUnit.Framework.Legacy;
-using Social.Core;
-using Social.Core.Application;
-using Social.Core.Ports.Incomming;
-using Social.Core.Ports.Outgoing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework.Legacy;
+using Social.Core;
+using Social.Core.Application;
+using Social.Core.Ports.Incomming;
+using Social.Core.Ports.Outgoing;
 
 namespace SocialCoreTests.CoreTests.ApplicationTests
 {
@@ -94,10 +94,16 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
     public class FakeProfileRepositoryAlwaysNull : IProfileRepository
     {
         public Task AddProfileAsync(Profile profile) => Task.CompletedTask;
+
         public Task DeleteProfileAsync(Guid profileId) => Task.CompletedTask;
-        public Task<IEnumerable<Profile>> GetAllProfilesAsync() => Task.FromResult<IEnumerable<Profile>>(new List<Profile>());
+
+        public Task<IEnumerable<Profile>> GetAllProfilesAsync() =>
+            Task.FromResult<IEnumerable<Profile>>(new List<Profile>());
+
         public Task<Profile?> GetProfileByIdAsync(Guid id) => Task.FromResult<Profile?>(null);
+
         public Task UpdateProfileAsync(Profile profile) => Task.CompletedTask;
+
         public Task AddFriendAsync(Guid profileId, Guid friendId) => Task.CompletedTask;
     }
 
@@ -129,7 +135,8 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
         public Task UpdateAsync(Post post)
         {
             var idx = _posts.FindIndex(p => p.Id == post.Id);
-            if (idx >= 0) _posts[idx] = post;
+            if (idx >= 0)
+                _posts[idx] = post;
             return Task.CompletedTask;
         }
     }
@@ -138,10 +145,16 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
     {
         public Task<Profile?> GetProfileByIdAsync(Guid id) =>
             Task.FromResult<Profile?>(new Profile { Id = id, Name = "TestUser" });
+
         public Task AddProfileAsync(Profile profile) => Task.CompletedTask;
+
         public Task DeleteProfileAsync(Guid profileId) => Task.CompletedTask;
-        public Task<IEnumerable<Profile>> GetAllProfilesAsync() => Task.FromResult<IEnumerable<Profile>>(new List<Profile>());
+
+        public Task<IEnumerable<Profile>> GetAllProfilesAsync() =>
+            Task.FromResult<IEnumerable<Profile>>(new List<Profile>());
+
         public Task UpdateProfileAsync(Profile profile) => Task.CompletedTask;
+
         public Task AddFriendAsync(Guid profileId, Guid friendId) => Task.CompletedTask;
     }
 
@@ -160,8 +173,11 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
             );
 
         public Task Notify(Profile profile, string message) => Task.CompletedTask;
-        public void Subscribe(Profile subscriber, Profile publisher) => throw new NotImplementedException();
-        public void Unsubscribe(Profile subscriber, Profile publisher) => throw new NotImplementedException();
-    }
 
+        public void Subscribe(Profile subscriber, Profile publisher) =>
+            throw new NotImplementedException();
+
+        public void Unsubscribe(Profile subscriber, Profile publisher) =>
+            throw new NotImplementedException();
+    }
 }

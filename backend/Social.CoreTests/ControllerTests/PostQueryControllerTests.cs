@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Moq;
-using Social.Core;
-using Social.Core.Ports.Incomming;
-using Social.Infrastructure.Adapters.Incomming;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Social.Core;
+using Social.Core.Ports.Incomming;
+using Social.Infrastructure.Adapters.Incomming;
 
 namespace SocialCoreTests.ControllerTests
 {
@@ -57,7 +57,7 @@ namespace SocialCoreTests.ControllerTests
             var posts = new List<Post>
             {
                 Post.CreateNewPost(Guid.NewGuid(), "Title1", "C1"),
-                Post.CreateNewPost(Guid.NewGuid(), "Title2", "C2")
+                Post.CreateNewPost(Guid.NewGuid(), "Title2", "C2"),
             };
 
             _queryUseCasesMock.Setup(q => q.GetFeedAsync(userId)).ReturnsAsync(posts);

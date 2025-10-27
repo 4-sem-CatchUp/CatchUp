@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Moq;
-using Social.Core;
-using Social.Core.Ports.Incomming;
-using Social.Infrastructure.Adapters.Incomming;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Social.Core;
+using Social.Core.Ports.Incomming;
+using Social.Infrastructure.Adapters.Incomming;
 
 namespace SocialCoreTests.ControllerTests
 {
@@ -32,11 +32,12 @@ namespace SocialCoreTests.ControllerTests
                 AuthorId = Guid.NewGuid(),
                 Title = "Test Post",
                 Content = "Some content",
-                Images = new List<Image>()
+                Images = new List<Image>(),
             };
             var postId = Guid.NewGuid();
-            _postUseCasesMock.Setup(u => u.CreatePostAsync(dto.AuthorId, dto.Title, dto.Content, dto.Images))
-                             .ReturnsAsync(postId);
+            _postUseCasesMock
+                .Setup(u => u.CreatePostAsync(dto.AuthorId, dto.Title, dto.Content, dto.Images))
+                .ReturnsAsync(postId);
 
             var result = await _controller.CreatePost(dto) as CreatedAtActionResult;
 
@@ -54,7 +55,10 @@ namespace SocialCoreTests.ControllerTests
             var result = await _controller.UpdatePost(id, dto) as NoContentResult;
 
             Assert.That(result, Is.Not.Null);
-            _postUseCasesMock.Verify(u => u.UpdatePostAsync(id, dto.NewTitle, dto.NewContent), Times.Once);
+            _postUseCasesMock.Verify(
+                u => u.UpdatePostAsync(id, dto.NewTitle, dto.NewContent),
+                Times.Once
+            );
         }
 
         [Test]

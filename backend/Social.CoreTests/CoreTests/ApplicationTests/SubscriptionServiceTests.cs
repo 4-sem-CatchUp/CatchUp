@@ -1,13 +1,13 @@
-﻿using Moq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Social.Core;
 using Social.Core.Application;
 using Social.Core.Ports.Outgoing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SocialCoreTests.CoreTests.ApplicationTests
 {
@@ -117,7 +117,7 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
             var subscriptions = new List<Subscription>
             {
                 new Subscription(_subscriber1, _publisher1),
-                new Subscription(_subscriber1, _publisher2)
+                new Subscription(_subscriber1, _publisher2),
             };
 
             _subscriptionRepoMock
@@ -163,7 +163,11 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
             var result = await _service.GetSubscribedAuthors(_subscriber1.Id);
 
             // Assert
-            Assert.That(result, Is.Empty, "Metoden burde returnere tom liste, hvis repository returnerer null.");
+            Assert.That(
+                result,
+                Is.Empty,
+                "Metoden burde returnere tom liste, hvis repository returnerer null."
+            );
         }
 
         [Test]
@@ -178,8 +182,11 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
             var result = await _service.GetSubscribedAuthors(_subscriber1.Id);
 
             // Assert
-            Assert.That(result, Is.Empty, "Metoden burde returnere tom liste, hvis der ingen subscriptions er.");
+            Assert.That(
+                result,
+                Is.Empty,
+                "Metoden burde returnere tom liste, hvis der ingen subscriptions er."
+            );
         }
-
     }
 }
