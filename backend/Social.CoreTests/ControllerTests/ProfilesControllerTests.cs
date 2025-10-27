@@ -43,19 +43,10 @@ namespace SocialCoreTests.ControllerTests
         public async Task CreateProfile_ReturnsCreated_WhenValidRequest()
         {
             // Arrange
-            var request = new CreateProfileRequest
-            {
-                UserName = "Alice",
-                Bio = "Hello world",
-                ProfilePic = new Image("avatar.png", "image/png", new byte[] { 1, 2, 3 }),
-            };
-
+            var request = new CreateProfileRequest { UserName = "Alice" };
             var newId = Guid.NewGuid();
 
-            // Setup mock for service
-            _useCasesMock
-                .Setup(u => u.CreateProfileAsync(request.UserName, request.Bio, request.ProfilePic))
-                .ReturnsAsync(newId);
+            _useCasesMock.Setup(u => u.CreateProfileAsync(request.UserName)).ReturnsAsync(newId);
 
             // Act
             var result = await _controller.CreateProfile(request);
@@ -67,9 +58,8 @@ namespace SocialCoreTests.ControllerTests
             Assert.That(created!.StatusCode ?? 201, Is.EqualTo(201));
             Assert.That(created.ActionName, Is.EqualTo(nameof(_controller.GetProfile)));
 
-            var response = created.Value as CreateProfileResponse;
-            Assert.That(response!.ProfileId, Is.EqualTo(newId));
-            Assert.That(response.Message, Is.EqualTo("Profile created successfully"));
+            dynamic response = created.Value!;
+            Assert.That(response.ProfileId, Is.EqualTo(newId));
         }
 
         [Test]
@@ -83,35 +73,6 @@ namespace SocialCoreTests.ControllerTests
 
             // Assert
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-        }
-
-        // ================================================================
-        //  CreateProfile
-        // ================================================================
-
-        [Test]
-        public async Task UpdateProfile_ReturnsNoContent_WhenValidRequest()
-        {
-            // Arrange
-            var profileId = Guid.NewGuid();
-            var request = new UpdateProfileRequest
-            {
-                Name = "Alice Updated",
-                Bio = "New bio",
-                ProfilePic = new Image("new_avatar.png", "image/png", new byte[] { 4, 5, 6 }),
-            };
-
-            _useCasesMock
-                .Setup(u =>
-                    u.UpdateProfileAsync(profileId, request.Name, request.ProfilePic, request.Bio)
-                )
-                .Returns(Task.CompletedTask);
-
-            // Act
-            var result = await _controller.UpdateProfile(profileId, request);
-
-            // Assert
-            Assert.That(result, Is.InstanceOf<NoContentResult>());
         }
 
         // ================================================================

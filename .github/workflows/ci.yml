@@ -44,12 +44,12 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        working-directory: CatchUp/frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Run tests
-        working-directory: CatchUp/frontend
-        run: npm test -- --watchAll=false
+        working-directory: frontend
+        run: npm test -- --run
 
   # --- BACKEND TESTS ---
   backend_tests:
@@ -57,6 +57,10 @@ jobs:
     needs: detect_changes
     if: needs.detect_changes.outputs.backend_changed == 'true'
     runs-on: ubuntu-latest
+
+    defaults:
+        run:
+            working-directory: backend
 
     steps:
       - name: Checkout
@@ -66,6 +70,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+    
+      # Check working dir
+      - name: Print working directory
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
 
       # Cache NuGet packages
       - name: Cache NuGet packages
@@ -78,31 +89,33 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        working-directory: CatchUp/backend
         run: dotnet restore CatchUp.Social.sln
 
       # Restore local dotnet tools
       - name: Restore dotnet tools
-        working-directory: CatchUp/backend
         run: dotnet tool restore
 
       # Build
       - name: Build solution
-        working-directory: CatchUp/backend
         run: dotnet build CatchUp.Social.sln --configuration Release
 
       # Check formatting
       - name: Check formatting with CSharpier
-        working-directory: CatchUp/backend
         run: dotnet csharpier check .
 
+      # Run linting
       - name: Run linting (dotnet format)
-        working-directory: CatchUp/backend
         run: dotnet format --verify-no-changes --severity error
 
-      # Run unit tests
+      # Debug step before tests
+      - name: Check directory before running tests
+        run: |
+          echo "Pre-test working directory: $(pwd)"
+          echo "Files in backend directory before tests:"
+          ls -la
+
+      # Run unit tests with coverage
       - name: Run unit tests with coverage
-        working-directory: CatchUp/backend
         run: |
           dotnet test Social.CoreTests/SocialCoreTests.csproj \
             --configuration Release \
@@ -110,25 +123,70 @@ jobs:
             --results-directory ./TestResults \
             --logger "trx;LogFileName=test_results.trx" \
             --verbosity normal
+
+          echo "Tests finished. TestResults content:"
+          ls -R ./TestResults || echo "⚠️ No TestResults directory found!"
         continue-on-error: true
 
+
+      # Debug step after tests
+      - name: Check TestResults existence
+        run: |
+          echo "Checking if TestResults folder exists:"
+          if [ -d "TestResults" ]; then
+            echo "✅ TestResults directory found!"
+            find TestResults -type f -name "coverage.cobertura.xml"
+          else
+            echo "❌ TestResults directory not found!"
+            exit 1
+          fi
+          
       # Upload test results
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: CatchUp/backend/TestResults/**/*.trx
+          name: test_results
+          path: backend/TestResults/test_results.trx
+
+
+      # Search for coverage files
+      - name: Find coverage files
+        id: find_coverage
+        run: |
+          echo "Searching for coverage files..."
+          files=$(find TestResults -type f -name "coverage.cobertura.xml" | tr '\n' ';')
+          echo "Found files: $files"
+          if [ -z "$files" ]; then
+            echo "❌ No coverage files found!"
+            exit 1
+          fi
+          echo "files=$files" >> $GITHUB_OUTPUT
 
       # Generate coverage report
       - name: Generate coverage report
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
-        with:
-          reports: 'CatchUp/backend/TestResults/**/coverage.cobertura.xml'
-          targetdir: 'coveragereport'
-          reporttypes: 'HtmlInline_AzurePipelines_Dark'
-          classfilters: '-Social.Program;-Social.Migrations*'
-          filefilters: '-**/Middleware/*'
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          echo "Generating report for files: ${{ steps.find_coverage.outputs.files }}"
+          reportgenerator \
+            -reports:"${{ steps.find_coverage.outputs.files }}" \
+            -targetdir:"coveragereport" \
+            -reporttypes:"HtmlInline_AzurePipelines_Dark" \
+            -classfilters:"+Social.*;-Social.Program;-Social.Migrations*" \
+            -filefilters:"-**/Middleware/*"
+
+      # Check if coverage report was generated
+      - name: Verify coverage report
+        run: |
+          echo "Checking if report was generated:"
+          if [ -d "coveragereport" ]; then
+            echo "✅ Report directory exists!"
+            ls -R coveragereport || true
+          else
+            echo "❌ Report directory missing!"
+            exit 1
+          fi
 
       # Upload coverage report
       - name: Upload coverage report
@@ -136,4 +194,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coveragereport
+          path: backend/coveragereport
