@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Social.Controllers;
 using Social.Core;
 using Social.Core.Ports.Incomming;
 using Social.Core.Ports.Outgoing;
+using Social.Infrastructure.Adapters.Incomming;
 
 namespace SocialCoreTests.ControllerTests
 {

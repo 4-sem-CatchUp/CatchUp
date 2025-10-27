@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Social.Core;
 using Social.Core.Ports.Incomming;
 
-namespace Social.Controllers
+namespace Social.Infrastructure.Adapters.Incomming
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -16,12 +16,12 @@ namespace Social.Controllers
             _postUseCases = postUseCases;
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> CreatePost([FromBody] CreatePostDto dto)
-        //{
-        //    var postId = await _postUseCases.CreatePostAsync(dto.AuthorId, dto.Content, dto.Image);
-        //    return CreatedAtAction(nameof(GetPostById), new { id = postId }, null);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostDto dto)
+        {
+            var postId = await _postUseCases.CreatePostAsync(dto.AuthorId, dto.Title, dto.Content, dto.Images);
+            return CreatedAtAction(nameof(GetPostById), new { id = postId }, null);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostById(Guid id)
@@ -77,5 +77,13 @@ namespace Social.Controllers
     {
         public Guid UserId { get; set; }
         public bool UpVote { get; set; }
+    }
+
+    public class ImageDto
+    {
+        public string FileName { get; set; } = string.Empty;
+        public string ContentType { get; set; } = string.Empty;
+        public byte[] Data { get; set; } = Array.Empty<byte>();
+
     }
 }

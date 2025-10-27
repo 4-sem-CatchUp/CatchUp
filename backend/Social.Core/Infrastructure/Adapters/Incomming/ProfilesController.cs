@@ -4,7 +4,7 @@ using Social.Core;
 using Social.Core.Ports.Incomming;
 using Social.Core.Ports.Outgoing;
 
-namespace Social.Controllers
+namespace Social.Infrastructure.Adapters.Incomming
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -109,4 +109,6 @@ namespace Social.Controllers
         public Image? ProfilePic { get; set; } = null;
         public string? bio { get; set; } = null;
     }
+
+    
 }
