@@ -53,14 +53,17 @@ namespace Social.Core.Application
 
         public void Unsubscribe(Profile subscriber, Profile publisher)
         {
+            // Remove existing subscription
             var subscription = _subscriptions.FirstOrDefault(s =>
                 s.Subscriber.Id == subscriber.Id && s.Publisher.Id == publisher.Id
             );
+            // If found, remove it from both in-memory list and repository
             if (subscription != null)
             {
                 _subscriptions.Remove(subscription);
                 _subscriptionRepository.Remove(subscription);
             }
+            // If not found, throw an exception
             else
             {
                 throw new InvalidOperationException("Subscription not found.");
