@@ -26,7 +26,8 @@ namespace Social.Infrastructure.Adapters.Incomming
         public async Task<IActionResult> GetPostById(Guid id)
         {
             var post = await _queryService.GetPostByIdAsync(id);
-            if (post == null) return NotFound();
+            if (post == null)
+                return NotFound();
             return Ok(post);
         }
     }

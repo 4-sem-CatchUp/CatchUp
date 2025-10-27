@@ -20,11 +20,11 @@ namespace Social.Core.Application
 
         public async Task<IEnumerable<Guid>> GetSubscribedAuthors(Guid subscriberId)
         {
-            var subscriptions = await _subscriptionRepository.GetSubscriptionsBySubscriberIdAsync(subscriberId)
+            var subscriptions =
+                await _subscriptionRepository.GetSubscriptionsBySubscriberIdAsync(subscriberId)
                 ?? Enumerable.Empty<Subscription>();
-                
-            return subscriptions.Select(s => s.Publisher.Id);
 
+            return subscriptions.Select(s => s.Publisher.Id);
         }
 
         public async Task Notify(Profile Subscriber, string message)

@@ -109,6 +109,4 @@ namespace Social.Infrastructure.Adapters.Incomming
         public Image? ProfilePic { get; set; } = null;
         public string? bio { get; set; } = null;
     }
-
-    
 }

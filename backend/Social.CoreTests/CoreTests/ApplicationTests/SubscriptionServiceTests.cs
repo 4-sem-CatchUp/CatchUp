@@ -129,9 +129,9 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            CollectionAssert.AreEquivalent(
-                new[] { _publisher1.Id, _publisher2.Id },
+            Assert.That(
                 result,
+                Is.EquivalentTo(new[] { _publisher1.Id, _publisher2.Id }),
                 "Metoden returnerede ikke de forventede Publisher-IDs."
             );
         }

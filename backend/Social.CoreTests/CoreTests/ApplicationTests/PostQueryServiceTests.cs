@@ -82,9 +82,9 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
 
             // Assert
             Assert.That(feed.Count(), Is.EqualTo(2));
-            CollectionAssert.AreEquivalent(
-                new[] { _author1, _author2 },
+            Assert.That(
                 feed.Select(p => p.AuthorId),
+                Is.EquivalentTo(new[] { _author1, _author2 }),
                 "Feed burde kun indeholde posts fra abonnementsliste."
             );
         }

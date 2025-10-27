@@ -26,7 +26,6 @@ namespace Social
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            
             builder.Services.AddDbContext<SocialDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SocialDb"))
             );
@@ -42,13 +41,11 @@ namespace Social
 
             // Services
             builder.Services.AddScoped<IPostUseCases, PostService>();
-            builder.Services.AddScoped <ICommentUseCases, CommentServices>();
+            builder.Services.AddScoped<ICommentUseCases, CommentServices>();
             builder.Services.AddScoped<IProfileUseCases, ProfileService>();
             builder.Services.AddScoped<IChatUseCases, ChatService>();
             builder.Services.AddScoped<ISubscribeUseCases, SubscriptionService>();
             builder.Services.AddScoped<IPostQueryUseCases, PostQueryService>();
-
-
 
             var app = builder.Build();
 

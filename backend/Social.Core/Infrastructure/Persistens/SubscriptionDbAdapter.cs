@@ -45,10 +45,12 @@ namespace Social.Infrastructure.Persistens
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Subscription>> GetSubscriptionsBySubscriberIdAsync(Guid subscriberId)
+        public async Task<IEnumerable<Subscription>> GetSubscriptionsBySubscriberIdAsync(
+            Guid subscriberId
+        )
         {
-            var entities = await _context.Subscriptions
-                .Include(s => s.Subscriber)
+            var entities = await _context
+                .Subscriptions.Include(s => s.Subscriber)
                 .Include(s => s.Publisher)
                 .Where(s => s.SubscriberId == subscriberId)
                 .ToListAsync();

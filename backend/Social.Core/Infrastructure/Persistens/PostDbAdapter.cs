@@ -79,8 +79,7 @@ namespace Social.Infrastructure.Persistens
         public async Task<IEnumerable<Post>> GetFeedByAuthorsAsync(IEnumerable<Guid> authorIds)
         {
             var entities = await _context
-                .Posts
-                .Where(p => authorIds.Contains(p.AuthorId))
+                .Posts.Where(p => authorIds.Contains(p.AuthorId))
                 .Include(p => p.Comments)
                 .Include(p => p.Votes)
                 .Include(p => p.Images)

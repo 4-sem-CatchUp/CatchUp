@@ -9,12 +9,17 @@ namespace Social.Core.Application
         private readonly IProfileRepository _profileRepository;
         private readonly ISubscribeUseCases _subscriptionService;
 
-        public PostQueryService(IPostRepository postRepository, IProfileRepository profileRepository, ISubscribeUseCases subscriptionService)
+        public PostQueryService(
+            IPostRepository postRepository,
+            IProfileRepository profileRepository,
+            ISubscribeUseCases subscriptionService
+        )
         {
             _postRepository = postRepository;
             _profileRepository = profileRepository;
             _subscriptionService = subscriptionService;
         }
+
         public async Task<IEnumerable<Post>> GetFeedAsync(Guid? userId = null)
         {
             if (userId.HasValue)
@@ -27,8 +32,9 @@ namespace Social.Core.Application
                 // Here you would typically get the list of authors the user is subscribed to
                 // and then fetch posts from those authors. For simplicity, we'll just return all posts.
 
-                var subscribedAuthors = await _subscriptionService.GetSubscribedAuthors(userId.Value);
-
+                var subscribedAuthors = await _subscriptionService.GetSubscribedAuthors(
+                    userId.Value
+                );
 
                 return await _postRepository.GetFeedByAuthorsAsync(subscribedAuthors);
             }
