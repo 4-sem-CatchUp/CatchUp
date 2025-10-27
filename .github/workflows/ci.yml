@@ -23,9 +23,9 @@ jobs:
         with:
           filters: |
             frontend:
-              - 'CatchUp/frontend/**'
+              - 'frontend/**'
             backend:
-              - 'CatchUp/backend/**'
+              - 'backend/**'
 
   # --- FRONTEND TESTS ---
   frontend_tests:
