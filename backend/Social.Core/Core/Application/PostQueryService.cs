@@ -22,8 +22,10 @@ namespace Social.Core.Application
 
         public async Task<IEnumerable<Post>> GetFeedAsync(Guid? userId = null)
         {
+            // If userId is provided, get personalized feed; otherwise, return all posts
             if (userId.HasValue)
             {
+                // Validate that the user exists
                 var profile = await _profileRepository.GetProfileByIdAsync(userId.Value);
                 if (profile == null)
                 {
@@ -46,6 +48,7 @@ namespace Social.Core.Application
 
         public async Task<Post?> GetPostByIdAsync(Guid postId)
         {
+            // Retrieve post by its ID
             var post = await _postRepository.GetByIdAsync(postId);
             return post;
         }
