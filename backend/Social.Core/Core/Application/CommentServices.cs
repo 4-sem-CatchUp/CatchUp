@@ -28,10 +28,12 @@ namespace Social.Core.Application
 
         public async Task AddComment(Guid postId, Guid authorId, string? text, List<Image>? images)
         {
+            // Retrieve the post to comment on
             var post =
                 await _postRepository.GetByIdAsync(postId)
                 ?? throw new InvalidOperationException("Post not found");
 
+            // Create and add the comment
             var comment = post.AddComment(authorId, text);
             if (images != null)
             {
@@ -55,12 +57,15 @@ namespace Social.Core.Application
 
         public async Task VoteComment(Guid commentId, bool upVote, Guid userId)
         {
+            // Retrieve the comment to vote on
             var comment =
                 await _commentRepository.GetByIdAsync(commentId)
                 ?? throw new InvalidOperationException("Comment not found");
 
+            // Add or update the vote
             var vote = comment.AddVote(userId, upVote);
 
+            // Persist the vote based on the action
             if (vote.Action == VoteAction.Add)
                 await _voteRepository.AddAsync(vote);
             else if (vote.Action == VoteAction.Update)
@@ -80,6 +85,7 @@ namespace Social.Core.Application
 
         public async Task<bool?> GetUserCommentVote(Guid postId, Guid commentId, Guid userId)
         {
+            // Retrieve the user's vote on the comment
             var vote = await _voteRepository.GetUserVoteAsync(
                 commentId,
                 VoteTargetType.Comment,
@@ -90,26 +96,32 @@ namespace Social.Core.Application
 
         public async Task<bool?> DeleteComment(Guid postId, Guid commentId, Guid userId)
         {
+            // Retrieve the comment to delete
             var comment =
                 await _commentRepository.GetByIdAsync(commentId)
                 ?? throw new InvalidOperationException("Comment not found");
 
+            // Check if the user is authorized to delete the comment
             if (comment.AuthorId != userId)
                 throw new InvalidOperationException("User not authorized to delete this comment");
 
+            // Delete the comment
             await _commentRepository.DeleteAsync(commentId);
             return true;
         }
 
         public async Task<bool?> UpdateCommentAsync(Guid commentId, Guid userId, string newContent)
         {
+            // Retrieve the comment to update
             var comment =
                 await _commentRepository.GetByIdAsync(commentId)
                 ?? throw new InvalidOperationException("Comment not found");
 
+            // Check if the user is authorized to update the comment
             if (comment.AuthorId != userId)
                 throw new InvalidOperationException("User not authorized to update this comment");
 
+            // Update the comment content
             comment.UpdateComment(newContent);
             await _commentRepository.UpdateAsync(comment);
             return true;
