@@ -49,7 +49,7 @@ jobs:
 
       - name: Run tests
         working-directory: frontend
-        run: npm test -- --watchAll=false
+        run: npm test -- --run
 
   # --- BACKEND TESTS ---
   backend_tests:
