@@ -106,10 +106,19 @@ jobs:
           dotnet test Social.CoreTests/SocialCoreTests.csproj \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
-            --results-directory .\TestResults \
+            --results-directory ./TestResults \
             --logger "trx;LogFileName=test_results.trx" \
             --verbosity normal
+
+            echo "Test results should be in: $(pwd)/TestResults"
         continue-on-error: true
+
+      # Log test results
+      - name: Log test results files
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing all files in TestResults:"
+          ls -R ./TestResults || echo "No files found in TestResults"
 
       # Upload test results
       - name: Upload test results
@@ -117,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: TestResults/**/*.trx
+          path: .\TestResults/**/*.trx
 
       # Generate coverage report
       - name: Generate coverage report
