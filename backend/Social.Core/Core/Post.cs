@@ -88,6 +88,7 @@
 
         public Comment AddComment(Guid authorId, string? text)
         {
+            // Create and add a new comment
             var comment = Comment.CreateNewComment(authorId, text);
             _comments.Add(comment);
             return comment;
@@ -102,7 +103,10 @@
 
         public Vote AddVote(Guid userId, bool upvote)
         {
+            // Check if the user has already voted
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
+
+            // If they have, update or remove the vote
             if (vote != null)
             {
                 if (vote.Upvote != upvote)
@@ -116,6 +120,7 @@
                     vote.Action = VoteAction.Remove;
                 }
             }
+            // If they haven't, add a new vote
             else
             {
                 vote = new Vote
@@ -140,12 +145,14 @@
 
         public bool? GetUserVote(Guid userId)
         {
+            // Find the vote by the user
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
             return vote?.Upvote;
         }
 
         public void UpdatePost(string? newTitle, string? newContent)
         {
+            // Update title and/or content if new values are provided
             if (newTitle != null)
                 Title = newTitle;
             if (newContent != null)
@@ -154,6 +161,7 @@
 
         public void RemoveComment(Guid commentId)
         {
+            // Find and remove the comment with the specified ID
             var comment = Comments.FirstOrDefault(c => c.Id == commentId);
             if (comment != null)
             {

@@ -58,6 +58,10 @@ jobs:
     if: needs.detect_changes.outputs.backend_changed == 'true'
     runs-on: ubuntu-latest
 
+    defaults:
+        run:
+            working-directory: backend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,31 +82,26 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        working-directory: backend
         run: dotnet restore CatchUp.Social.sln
 
       # Restore local dotnet tools
       - name: Restore dotnet tools
-        working-directory: backend
         run: dotnet tool restore
 
       # Build
       - name: Build solution
-        working-directory: backend
         run: dotnet build CatchUp.Social.sln --configuration Release
 
       # Check formatting
       - name: Check formatting with CSharpier
-        working-directory: backend
         run: dotnet csharpier check .
 
+      # Run linting
       - name: Run linting (dotnet format)
-        working-directory: backend
         run: dotnet format --verify-no-changes --severity error
 
-      # Run unit tests
+      # Run unit tests with coverage
       - name: Run unit tests with coverage
-        working-directory: backend
         run: |
           dotnet test Social.CoreTests/SocialCoreTests.csproj \
             --configuration Release \
@@ -125,7 +124,7 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
         with:
           reports: 'TestResults/**/coverage.cobertura.xml'
-          targetdir: 'coveragereport'
+          targetdir: 'backend/coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines_Dark'
           classfilters: '-Social.Program;-Social.Migrations*'
           filefilters: '-**/Middleware/*'
@@ -136,4 +135,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coveragereport
+          path: backend/coveragereport
