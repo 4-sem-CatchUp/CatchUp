@@ -146,6 +146,7 @@ jobs:
           echo "Listing all coverage files (full path):"
           find TestResults -type f -name '*.coverage.cobertura.xml' || echo "No coverage files found"
 
+
       # Generate coverage report
       - name: Generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
