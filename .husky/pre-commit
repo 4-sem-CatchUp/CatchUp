@@ -1,3 +1,5 @@
+cd frontend
+
 echo "🔍 Running ESLint..."
 npm run lint || exit 1
 

@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import prettier from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import tseslint from 'typescript-eslint'
+import tseslint from 'typescript-eslint';
 
 /**
  * ESLint configuration
@@ -41,7 +41,7 @@ export default defineConfig([
     },
     languageOptions: {
       ecmaVersion: 2020,
-      globals: {...globals.browser, ...globals.vitest,},
+      globals: { ...globals.browser, ...globals.vitest },
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
@@ -50,7 +50,15 @@ export default defineConfig([
     },
     // eslint.config.js (kun rules-blokken vist)
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^[A-Z_]', // ignore unused vars starting with _ or uppercase
+          argsIgnorePattern: '^_', // ignore unused function params starting with _
+          caughtErrorsIgnorePattern: '^_', // ignore unused caught errors like (err)
+          ignoreRestSiblings: true, // ignore when using object rest (...rest)
+        },
+      ],
       quotes: 'off', // lad ikke ESLint håndhæve quotes
       'prettier/prettier': [
         'off',
@@ -60,6 +68,7 @@ export default defineConfig([
           endOfLine: 'lf',
         },
       ],
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ]);
