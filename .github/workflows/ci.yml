@@ -130,6 +130,12 @@ jobs:
                 TestResults/*.trx
                 TestResults/**/*.trx
 
+      # List test result files before upload
+      - name: List test result files
+        run: |
+          echo "Listing all .trx files to be uploaded:"
+          ls -R TestResults | grep .trx || echo "No .trx files found"
+
       # Log coverage files
       - name: Debug coverage files
         run: |
