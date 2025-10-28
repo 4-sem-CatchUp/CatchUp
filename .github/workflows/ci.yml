@@ -128,12 +128,17 @@ jobs:
           name: test-results
           path: ./TestResults/**/*.trx
 
+      # Log coverage files
+      - name: Debug coverage files
+        run: |
+          echo "Listing all coverage files:"
+          find ./TestResults -name '*.coverage.cobertura.xml'
 
       # Generate coverage report
       - name: Generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
         with:
-          reports: 'TestResults/**/*.coverage.cobertura.xml'
+          reports: 'TestResults/**/In/*.coverage.cobertura.xml'
           targetdir: 'coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines_Dark'
           classfilters: '-Social.Program;-Social.Migrations*'
