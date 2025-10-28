@@ -125,7 +125,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test_results
           path: |
                 TestResults/*.trx
                 TestResults/**/*.trx
@@ -140,7 +140,7 @@ jobs:
       - name: Debug coverage files
         run: |
           echo "Listing all coverage files:"
-          find TestResults -name '*.coverage.cobertura.xml'
+          find "$PWD/TestResults" -type f -name '*.coverage.cobertura.xml'
 
       # Generate coverage report
       - name: Generate coverage report
