@@ -126,21 +126,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test_results
-          path: |
-                TestResults/*.trx
-                TestResults/**/*.trx
+          path: TestResults/test_results.trx
 
       # List test result files before upload
       - name: List test result files
         run: |
           echo "Listing all .trx files to be uploaded:"
           ls -R TestResults | grep .trx || echo "No .trx files found"
+          echo "And filepath:"
+          find TestResults -type f -name '*.trx' || echo "No .trx files found"
+          
 
-      # Log coverage files
-      - name: Debug coverage files
+      # List coverage files before processing
+      - name: List coverage files
         run: |
-          echo "Listing all coverage files:"
-          find "$PWD/TestResults" -type f -name '*.coverage.cobertura.xml'
+          echo "Listing all coverage files (filename only):"
+          find TestResults -type f -name '*.coverage.cobertura.xml' -exec basename {} \; || echo "No coverage files found"
+          
+          echo "Listing all coverage files (full path):"
+          find TestResults -type f -name '*.coverage.cobertura.xml' || echo "No coverage files found"
 
       # Generate coverage report
       - name: Generate coverage report
