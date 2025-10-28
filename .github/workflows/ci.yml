@@ -135,12 +135,20 @@ jobs:
         run: |
           echo "Listing all .trx files to be uploaded:"
           ls -R TestResults | grep .trx || echo "No .trx files found"
+          echo "And filepath:"
+          find TestResults -type f -name '*.trx' || echo "No .trx files found"
+          
 
-      # Log coverage files
-      - name: Debug coverage files
+      # List coverage files before processing
+      - name: List coverage files
         run: |
-          echo "Listing all coverage files:"
-          find "$PWD/TestResults" -type f -name '*.coverage.cobertura.xml'
+          echo "Listing all coverage.cobertura.xml files (filename only):"
+          ls TestResults/**/*.coverage.cobertura.xml 2>/dev/null || echo "No coverage files found"
+
+          echo ""
+          echo "Listing all coverage.cobertura.xml files (full path):"
+          find TestResults -type f -name '*.coverage.cobertura.xml' || echo "No coverage files found"
+
 
       # Generate coverage report
       - name: Generate coverage report
