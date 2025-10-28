@@ -40,7 +40,11 @@ export function useFeedSubs(posts: Post[]): UseFeedSubsResult {
   const toggleSub = (sub: string) => {
     setSelectedSubs((prev) => {
       const next = new Set(prev);
-      next.has(sub) ? next.delete(sub) : next.add(sub);
+      if (next.has(sub)) {
+        next.delete(sub);
+      } else {
+        next.add(sub);
+      }
       return next;
     });
   };

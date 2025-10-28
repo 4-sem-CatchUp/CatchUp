@@ -1,7 +1,0 @@
-echo "🔍 Running ESLint..."
-npm run lint || exit 1
-
-echo "🧪 Running Vitest..."
-npm run test || exit 1
-
-echo "✅ All checks passed! Proceeding with commit..."

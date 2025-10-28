@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ReactNode } from 'react';
+// import type { ReactNode } from 'react';
 import Truncate from '../../../components/ui/Truncate';
 import DefaultButton from '../../../components/ui/DefaultButton';
 
