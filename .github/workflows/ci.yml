@@ -128,6 +128,7 @@ jobs:
           name: test-results
           path: .\TestResults/**/*.trx
 
+
       # Generate coverage report
       - name: Generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
