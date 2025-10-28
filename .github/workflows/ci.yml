@@ -126,14 +126,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: .\TestResults/**/*.trx
+          path: ./TestResults/**/*.trx
 
 
       # Generate coverage report
       - name: Generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
         with:
-          reports: 'TestResults/**/coverage.cobertura.xml'
+          reports: 'TestResults/**/*.coverage.cobertura.xml'
           targetdir: 'coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines_Dark'
           classfilters: '-Social.Program;-Social.Migrations*'
