@@ -124,7 +124,7 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
         with:
           reports: 'TestResults/**/coverage.cobertura.xml'
-          targetdir: 'backend/coveragereport'
+          targetdir: 'coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines_Dark'
           classfilters: '-Social.Program;-Social.Migrations*'
           filefilters: '-**/Middleware/*'
