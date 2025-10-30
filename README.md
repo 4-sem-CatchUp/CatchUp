@@ -1,10 +1,10 @@
-# 🪩 CatchUp — 4th Semester Exam Project (Team 7, Datamatiker 2025)
+## CatchUp — 4th Semester Exam Project (Team 7, Datamatiker 2025)
 
 **CatchUp** is a European-focused **social media platform** developed as our 4th-semester project.  
 The goal is to build a *transparent, decentralized and GDPR-friendly* alternative to existing social media platforms — combining a clean architecture backend, a modern React/TypeScript frontend, and a gamified user experience.
 
 
-## 🧱 System Overview
+## System Overview
 
 The system consists of multiple parts working together:
 
@@ -15,7 +15,7 @@ The system consists of multiple parts working together:
 The architecture is intentionally modular to mirror a real-world microservice-inspired system while keeping development manageable for a student team.
 
 
-## ⚙️ Technologies Used
+## Technologies Used
 
 ### Frontend  
 - React 18 + TypeScript  
@@ -36,7 +36,7 @@ The architecture is intentionally modular to mirror a real-world microservice-in
 - Custom 3D assets and environment design  
 - Player/NPC interaction system and achievement triggers  
 
-## 🧩 Core Architecture (Backend)
+## Core Architecture (Backend)
 
 The backend is organized into multiple *cores* under the main solution:
 
@@ -52,7 +52,7 @@ Each core defines its own **domain layer**, **ports**, and **adapters**, making 
 
 
 
-## 🧠 Frontend Structure
+## Frontend Structure
 ```
 /src
 ├── app/ # Global layout (AppLayout, routes, providers)
@@ -66,7 +66,7 @@ Each core defines its own **domain layer**, **ports**, and **adapters**, making 
 └── tests/ # Unit and integration tests
 ```
 
-## 👥 Team Members
+## Team Members
 
 | Name | Role / Responsibilities |
 |------|--------------------------|
@@ -76,7 +76,7 @@ Each core defines its own **domain layer**, **ports**, and **adapters**, making 
 | **Kenneth** | Gamification design, Unity development, achievement logic & asset integration |
 
 
-## 📁 Project Repositoy
+## Project Repositoy
 
 | Part | Repository |
 |------|-------------|
@@ -85,7 +85,7 @@ Each core defines its own **domain layer**, **ports**, and **adapters**, making 
 | **Game / Unity Module** | Private repo, internal development (soon to be added here) |
 
 
-## 🚀 Running the Frontend Locally
+## Running the Frontend Locally
 
 ```bash
 # Clone the repository
@@ -101,7 +101,7 @@ npm run dev
 The app will start on http://localhost:5173/
 ```
 
-## 🧪 Testing & Automation
+## Testing & Automation
 
 Prettier + ESLint ensure code consistency
 
@@ -117,7 +117,7 @@ Example:
 npm run test
 ```
 
-## 🧭 Vision
+## Vision
 
 “A social media platform built around community, privacy, and transparency — not ads.”
 
@@ -131,6 +131,4 @@ It experiments with decentralization, gamified engagement, and responsible data 
   ██║     ██╔══██║   ██║   ██║     ██╔══██║██║   ██║██╔═══╝ 
   ╚██████╗██║  ██║   ██║   ╚██████╗██║  ██║╚██████╔╝██║     
    ╚═════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     
-
-                 Build • Connect • Evolve
 ```
