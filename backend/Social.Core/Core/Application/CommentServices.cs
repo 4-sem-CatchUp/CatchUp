@@ -26,7 +26,12 @@ namespace Social.Core.Application
             _subscriptionService = subscriptionService;
         }
 
-        public async Task AddComment(Guid postId, Guid authorId, string? text, List<Image>? images)
+        public async Task<Guid> AddComment(
+            Guid postId,
+            Guid authorId,
+            string? text,
+            List<Image>? images
+        )
         {
             // Retrieve the post to comment on
             var post =
@@ -53,6 +58,8 @@ namespace Social.Core.Application
                 profile,
                 $"New comment ({comment.Id} ) on your post ( {postId} )"
             );
+
+            return comment.Id;
         }
 
         public async Task VoteComment(Guid commentId, bool upVote, Guid userId)

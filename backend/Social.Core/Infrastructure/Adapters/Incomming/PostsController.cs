@@ -50,7 +50,7 @@ namespace Social.Infrastructure.Adapters.Incomming
         }
 
         [HttpPost("{id}/vote")]
-        public async Task<IActionResult> VotePost(Guid id, [FromBody] VoteDto dto)
+        public async Task<IActionResult> VotePost(Guid id, [FromBody] PostVoteDto dto)
         {
             await _postUseCases.VotePost(id, dto.UpVote, dto.UserId);
             return Ok();
@@ -78,7 +78,7 @@ namespace Social.Infrastructure.Adapters.Incomming
         public string? NewContent { get; set; }
     }
 
-    public class VoteDto
+    public class PostVoteDto
     {
         public Guid UserId { get; set; }
         public bool UpVote { get; set; }

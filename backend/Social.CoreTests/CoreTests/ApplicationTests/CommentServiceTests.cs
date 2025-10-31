@@ -73,6 +73,13 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
             _mockCommentRepo.Verify(r => r.AddAsync(It.IsAny<Comment>()), Times.Once);
         }
 
+        [Test]
+        public async Task AddComment_ShouldReturnId()
+        {
+            var commentId = await _service.AddComment(_postId, _userId, "Another comment", null);
+            Assert.That(commentId, Is.Not.EqualTo(Guid.Empty));
+        }
+
         // --- UPDATE COMMENT ---
         [Test]
         public async Task UpdateComment_ShouldUpdateCommentContent()

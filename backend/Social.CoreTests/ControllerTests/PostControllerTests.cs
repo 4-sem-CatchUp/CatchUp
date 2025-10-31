@@ -76,7 +76,7 @@ namespace SocialCoreTests.ControllerTests
         public async Task VotePost_Returns_Ok()
         {
             var id = Guid.NewGuid();
-            var dto = new VoteDto { UserId = Guid.NewGuid(), UpVote = true };
+            var dto = new PostVoteDto { UserId = Guid.NewGuid(), UpVote = true };
 
             var result = await _controller.VotePost(id, dto) as OkResult;
 
