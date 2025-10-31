@@ -5,5 +5,6 @@
         void Subscribe(Profile subscriber, Profile publisher);
         void Unsubscribe(Profile subscriber, Profile publisher);
         Task Notify(Profile Subscriber, string message);
+        Task<IEnumerable<Guid>> GetSubscribedAuthors(Guid subscriberId);
     }
 }

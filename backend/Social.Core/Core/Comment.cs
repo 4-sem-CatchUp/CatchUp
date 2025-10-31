@@ -47,7 +47,9 @@ namespace Social.Core
 
         public Vote AddVote(Guid userId, bool upvote)
         {
+            // Check if the user has already voted
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
+            // If they have, update or remove the vote
             if (vote != null)
             {
                 if (vote.Upvote != upvote)
@@ -63,6 +65,7 @@ namespace Social.Core
             }
             else
             {
+                // If they haven't, add a new vote
                 vote = new Vote
                 {
                     Id = Guid.NewGuid(),
@@ -90,6 +93,7 @@ namespace Social.Core
 
         public bool? GetUserVote(Guid userId)
         {
+            // Returns true for upvote, false for downvote, null for no vote
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
             return vote?.Upvote;
         }

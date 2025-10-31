@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Social.Core.Application;
+using Social.Core.Ports.Incomming;
+using Social.Core.Ports.Outgoing;
+using Social.Infrastructure.Persistens;
 using Social.Infrastructure.Persistens.dbContexts;
 using Social.Middleware;
 
@@ -21,9 +25,27 @@ namespace Social
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
             builder.Services.AddDbContext<SocialDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SocialDb"))
             );
+
+            //Repositories
+            builder.Services.AddScoped<IPostRepository, PostDbAdapter>();
+            builder.Services.AddScoped<IProfileRepository, ProfileDbAdapter>();
+            builder.Services.AddScoped<IChatRepository, ChatDbAdapter>();
+            builder.Services.AddScoped<ICommentRepository, CommentDbAdapter>();
+            builder.Services.AddScoped<IImageRepository, ImageDbAdapter>();
+            builder.Services.AddScoped<ISubscriptionRepository, SubscriptionDbAdapter>();
+            builder.Services.AddScoped<IVoteRepository, VoteDbAdapter>();
+
+            // Services
+            builder.Services.AddScoped<IPostUseCases, PostService>();
+            builder.Services.AddScoped<ICommentUseCases, CommentServices>();
+            builder.Services.AddScoped<IProfileUseCases, ProfileService>();
+            builder.Services.AddScoped<IChatUseCases, ChatService>();
+            builder.Services.AddScoped<ISubscribeUseCases, SubscriptionService>();
+            builder.Services.AddScoped<IPostQueryUseCases, PostQueryService>();
 
             var app = builder.Build();
 

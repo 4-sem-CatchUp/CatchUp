@@ -35,7 +35,9 @@ namespace Social.Core.Application
             List<Image>? images
         )
         {
+            // Create new post
             var post = Post.CreateNewPost(authorId, title, content);
+            // Add images if any
             if (images != null)
             {
                 foreach (var image in images)
@@ -43,18 +45,22 @@ namespace Social.Core.Application
                     post.AddImage(image.FileName, image.ContentType, image.Data);
                 }
             }
+            // Save post to repository
             await _postRepository.AddAsync(post);
             return post.Id;
         }
 
         public async Task VotePost(Guid postId, bool upVote, Guid userId)
         {
+            // Retrieve the post
             var post =
                 await _postRepository.GetByIdAsync(postId)
                 ?? throw new InvalidOperationException("Post not found");
 
+            // Add or update the vote
             var vote = post.AddVote(userId, upVote);
 
+            // Persist the vote
             if (vote.Action == VoteAction.Add)
                 await _voteRepository.AddAsync(vote);
             else if (vote.Action == VoteAction.Update)
@@ -74,23 +80,28 @@ namespace Social.Core.Application
 
         public async Task<bool?> GetUserPostVote(Guid postId, Guid userId)
         {
+            // Retrieve the user's vote on the post
             var vote = await _voteRepository.GetUserVoteAsync(postId, VoteTargetType.Post, userId);
             return vote?.Upvote;
         }
 
         public async Task DeletePost(Guid postId)
         {
+            // Retrieve the post
             var post =
                 await _postRepository.GetByIdAsync(postId)
                 ?? throw new InvalidOperationException("Post not found");
+            // Delete associated comments
             await _postRepository.DeleteAsync(postId);
         }
 
         public async Task UpdatePostAsync(Guid postId, string? newTitle, string? newContent)
         {
+            // Retrieve the post
             var post =
                 await _postRepository.GetByIdAsync(postId)
                 ?? throw new InvalidOperationException("Post not found");
+            // Update post details
             post.UpdatePost(newTitle, newContent);
             await _postRepository.UpdateAsync(post);
         }
