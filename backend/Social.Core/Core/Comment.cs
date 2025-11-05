@@ -70,7 +70,7 @@ namespace Social.Core
                 {
                     Id = Guid.NewGuid(),
                     TargetId = Id,
-                    VoteTargetType = VoteTargetType.Post,
+                    VoteTargetType = VoteTargetType.Comment,
                     UserId = userId,
                     Upvote = upvote,
                     Action = VoteAction.Add,

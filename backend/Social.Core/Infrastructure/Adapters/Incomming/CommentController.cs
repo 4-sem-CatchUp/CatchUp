@@ -25,50 +25,40 @@ namespace Social.Infrastructure.Adapters.Incomming
                 dto.Text,
                 dto.Images
             );
-            return CreatedAtAction(nameof(GetCommentById), new { id = commentId }, null);
+            return CreatedAtAction(nameof(AddComment), new { id = commentId }, null);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCommentById(Guid id)
-        {
-            // Dette kunne kalde et ICommentQueryUseCase, hvis du har et query-lag
-            return Ok(new { Message = $"Dummy: Would return comment {id}" });
-        }
-
-        [HttpPut("{commentId}, {userId}")]
+        [HttpPut("{commentId:guid}/{userId:guid}")]
         public async Task<IActionResult> UpdateComment(
             Guid commentId,
             Guid userId,
             [FromBody] UpdateCommentDto dto
         )
         {
-            await _commentUseCases.UpdateCommentAsync(commentId, userId, dto.NewContent);
+            var result = await _commentUseCases.UpdateCommentAsync(
+                commentId,
+                userId,
+                dto.NewContent
+            );
+            if (result == false)
+                return Forbid();
             return NoContent();
         }
 
-        [HttpDelete("{postId}, {commentId}, {userId}")]
+        [HttpDelete("{postId:guid}/{commentId:guid}/{userId:guid}")]
         public async Task<IActionResult> DeleteComment(Guid postId, Guid commentId, Guid userId)
         {
-            await _commentUseCases.DeleteComment(postId, commentId, userId);
+            var result = await _commentUseCases.DeleteComment(postId, commentId, userId);
+            if (result == false)
+                return Forbid();
             return NoContent();
         }
 
-        [HttpPost("{commentId}/vote")]
+        [HttpPost("{commentId:guid}/vote")]
         public async Task<IActionResult> VoteComment(Guid commentId, [FromBody] CommentVoteDto dto)
         {
             await _commentUseCases.VoteComment(commentId, dto.UpVote, dto.UserId);
             return Ok();
-        }
-
-        [HttpGet("{postId}, {commentId}/vote/{userId}")]
-        public async Task<IActionResult> GetUserCommentVote(
-            Guid postId,
-            Guid commentId,
-            Guid userId
-        )
-        {
-            var vote = await _commentUseCases.GetUserCommentVote(postId, commentId, userId);
-            return Ok(vote);
         }
     }
 

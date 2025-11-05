@@ -63,6 +63,17 @@ namespace Social.Infrastructure.Persistens
             return entity.Select(e => e.ToDomain()).ToList();
         }
 
+        public Task<IReadOnlyList<Comment>> GetCommentsByIdAsync(Guid postId)
+        {
+            var entities = _context
+                .Comments.Include(c => c.Votes)
+                .Include(c => c.Images)
+                .Where(c => c.PostId == postId)
+                .ToList();
+            var comments = entities.Select(e => e.ToDomain()).ToList();
+            return Task.FromResult<IReadOnlyList<Comment>>(comments);
+        }
+
         // Update an existing comment
         public async Task UpdateAsync(Comment comment)
         {

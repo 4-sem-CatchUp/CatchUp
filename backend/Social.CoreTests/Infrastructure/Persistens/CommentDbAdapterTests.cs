@@ -175,5 +175,53 @@ namespace SocialCoreTests.Infrastructure.Persistens
             var exists = await _context.Comments.AnyAsync(c => c.Id == entity.Id);
             Assert.That(exists, Is.False);
         }
+
+        [Test]
+        public async Task GetCommentsByIdAsync_Should_Return_All_Comments_For_Post()
+        {
+            // Arrange
+            var postId = Guid.NewGuid();
+
+            var commentEntities = new List<CommentEntity>
+            {
+                new CommentEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AuthorId = Guid.NewGuid(),
+                    Content = "Comment 1",
+                    PostId = postId,
+                    Timestamp = DateTime.UtcNow,
+                },
+                new CommentEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AuthorId = Guid.NewGuid(),
+                    Content = "Comment 2",
+                    PostId = postId,
+                    Timestamp = DateTime.UtcNow,
+                },
+                new CommentEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AuthorId = Guid.NewGuid(),
+                    Content = "Other post comment",
+                    PostId = Guid.NewGuid(),
+                    Timestamp = DateTime.UtcNow,
+                },
+            };
+
+            _context.Comments.AddRange(commentEntities);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _adapter.GetCommentsByIdAsync(postId);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result.Any(c => c.Content == "Comment 1"), Is.True);
+            Assert.That(result.Any(c => c.Content == "Comment 2"), Is.True);
+            Assert.That(result.Any(c => c.Content == "Other post comment"), Is.False);
+        }
     }
 }

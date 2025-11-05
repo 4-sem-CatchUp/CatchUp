@@ -11,11 +11,11 @@ namespace Social.Infrastructure.Adapters.Incomming
     public class ProfilesController : ControllerBase
     {
         private readonly IProfileUseCases _profileUseCases;
-        private readonly ILogger _logger;
+        private readonly ILogger<ProfilesController> _logger;
         private readonly IProfileRepository _profileRepository;
 
         public ProfilesController(
-            ILogger logger,
+            ILogger<ProfilesController> logger,
             IProfileUseCases profileUseCases,
             IProfileRepository profileRepository
         )
@@ -31,9 +31,18 @@ namespace Social.Infrastructure.Adapters.Incomming
             if (string.IsNullOrWhiteSpace(request.UserName))
                 return BadRequest("Username is required");
 
-            _logger.LogInformation("Creating profile for user: {UserName}", request.UserName);
+            _logger.LogInformation(
+                "Creating profile for user: {UserName}",
+                request.UserName,
+                request.Bio,
+                request.ProfilePic
+            );
 
-            var profileId = await _profileUseCases.CreateProfileAsync(request.UserName);
+            var profileId = await _profileUseCases.CreateProfileAsync(
+                request.UserName,
+                request.Bio,
+                request.ProfilePic
+            );
 
             var response = new CreateProfileResponse
             {
@@ -44,6 +53,21 @@ namespace Social.Infrastructure.Adapters.Incomming
             _logger.LogInformation("Profile created with ID: {ProfileId}", profileId);
 
             return CreatedAtAction(nameof(GetProfile), new { id = profileId }, response);
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateProfile(
+            Guid id,
+            [FromBody] UpdateProfileRequest request
+        )
+        {
+            await _profileUseCases.UpdateProfileAsync(
+                id,
+                request.Name,
+                request.ProfilePic,
+                request.Bio
+            );
+            return NoContent();
         }
 
         [HttpGet("{id:guid}")]
@@ -95,6 +119,8 @@ namespace Social.Infrastructure.Adapters.Incomming
     public class CreateProfileRequest
     {
         public string UserName { get; set; } = null;
+        public string? Bio { get; set; } = null;
+        public Image? ProfilePic { get; set; } = null;
     }
 
     public class CreateProfileResponse
@@ -107,6 +133,6 @@ namespace Social.Infrastructure.Adapters.Incomming
     {
         public string? Name { get; set; } = null;
         public Image? ProfilePic { get; set; } = null;
-        public string? bio { get; set; } = null;
+        public string? Bio { get; set; } = null;
     }
 }

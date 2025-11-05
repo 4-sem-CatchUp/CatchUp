@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Social.Core.Application;
 using Social.Core.Ports.Incomming;
 using Social.Core.Ports.Outgoing;
+using Social.Infrastructure.Notification;
 using Social.Infrastructure.Persistens;
 using Social.Infrastructure.Persistens.dbContexts;
 using Social.Middleware;
+using Social.Social.Infrastructure.Notification;
 
 namespace Social
 {
@@ -20,12 +22,13 @@ namespace Social
 
             // Add services to the container.
             builder.Services.AddSignalR();
-
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Database context
             builder.Services.AddDbContext<SocialDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SocialDb"))
             );
@@ -47,6 +50,10 @@ namespace Social
             builder.Services.AddScoped<ISubscribeUseCases, SubscriptionService>();
             builder.Services.AddScoped<IPostQueryUseCases, PostQueryService>();
 
+            //Notification services (SignalR)
+            builder.Services.AddScoped<INotificationSender, NotificationSender>();
+            builder.Services.AddScoped<IChatNotifier, ChatNotifierService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -57,12 +64,15 @@ namespace Social
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
 
             // Middleware
             app.UseMiddleware<ExceptionHandlingMiddleware>(); // Catches all errors
             app.UseMiddleware<RequestLoggingMiddleware>(); // Logging all successes
+
+            // Map SignalR hubs
+            app.MapHub<NotificationHub>("/notificationHub");
+            app.MapHub<ChatHub>("/chatHub");
 
             app.MapControllers();
 

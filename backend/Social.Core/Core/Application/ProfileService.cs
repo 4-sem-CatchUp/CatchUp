@@ -13,11 +13,15 @@ namespace Social.Core.Application
             _profileRepository = profileRepository;
         }
 
-        public async Task<Guid> CreateProfileAsync(string userName)
+        public async Task<Guid> CreateProfileAsync(
+            string userName,
+            string? bio = null,
+            Image? pic = null
+        )
         {
-            // Create new profile
             var profile = Profile.CreateNewProfile(userName);
-            // Save profile to repository
+            profile.UpdateProfile(userName, bio, pic);
+
             await _profileRepository.AddProfileAsync(profile);
             return profile.Id;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Social.Core;
 using Social.Core.Ports.Incomming;
@@ -16,12 +17,14 @@ namespace SocialCoreTests.ControllerTests
     {
         private Mock<IPostQueryUseCases> _queryUseCasesMock;
         private PostQueryController _controller;
+        private Mock<ILogger<PostQueryController>> _loggerMock;
 
         [SetUp]
         public void Setup()
         {
             _queryUseCasesMock = new Mock<IPostQueryUseCases>();
-            _controller = new PostQueryController(_queryUseCasesMock.Object);
+            _loggerMock = new Mock<ILogger<PostQueryController>>();
+            _controller = new PostQueryController(_queryUseCasesMock.Object, _loggerMock.Object);
         }
 
         [Test]
