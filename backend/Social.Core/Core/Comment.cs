@@ -29,6 +29,15 @@ namespace Social.Core
             _votes = votes;
         }
 
+        public Comment(Guid id, Guid authorId, string text, DateTime timeStamp, List<Vote> votes)
+        {
+            Id = id;
+            AuthorId = authorId;
+            Content = text;
+            Timestamp = timeStamp;
+            _votes = votes;
+        }
+
         public static Comment CreateNewComment(Guid authorId, string text)
         {
             return new Comment { AuthorId = authorId, Content = text };

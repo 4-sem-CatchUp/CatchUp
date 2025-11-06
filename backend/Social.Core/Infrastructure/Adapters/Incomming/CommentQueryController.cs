@@ -65,7 +65,12 @@ namespace Social.Infrastructure.Adapters.Incomming
                 userId,
                 vote
             );
-            return Ok(new { upvoted = vote });
+            return Ok(new UserVoteDto { Upvoted = vote });
         }
+    }
+
+    public class UserVoteDto
+    {
+        public bool? Upvoted { get; set; }
     }
 }
