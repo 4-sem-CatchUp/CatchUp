@@ -2,6 +2,6 @@
 {
     public interface INotificationSender
     {
-        void SendNotification(Profile recipient, string message);
+        Task SendNotification(Profile recipient, string message);
     }
 }

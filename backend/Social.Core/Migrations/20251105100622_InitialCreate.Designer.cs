@@ -12,7 +12,7 @@ using Social.Infrastructure.Persistens.dbContexts;
 namespace Social.Migrations
 {
     [DbContext(typeof(SocialDbContext))]
-    [Migration("20251003144455_InitialCreate")]
+    [Migration("20251105100622_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace Social.Migrations
                     b.ToTable("Friendships", (string)null);
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Chat", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatEntity", b =>
                 {
                     b.Property<Guid>("ChatId")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace Social.Migrations
                     b.ToTable("Chats");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatMessage", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatMessageEntity", b =>
                 {
                     b.Property<Guid>("MessageId")
                         .ValueGeneratedOnAdd()
@@ -66,6 +66,9 @@ namespace Social.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ImageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Seen")
                         .HasColumnType("bit");
@@ -79,6 +82,8 @@ namespace Social.Migrations
                     b.HasKey("MessageId");
 
                     b.HasIndex("ChatId");
+
+                    b.HasIndex("ImageId");
 
                     b.HasIndex("SenderId");
 
@@ -107,7 +112,7 @@ namespace Social.Migrations
                     b.ToTable("ChatParticipants");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Comment", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.CommentEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -134,16 +139,13 @@ namespace Social.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Image", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ImageEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ChatMessageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ChatMessageMessageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("CommentId")
@@ -171,10 +173,6 @@ namespace Social.Migrations
 
                     b.HasIndex("ChatMessageId");
 
-                    b.HasIndex("ChatMessageMessageId")
-                        .IsUnique()
-                        .HasFilter("[ChatMessageMessageId] IS NOT NULL");
-
                     b.HasIndex("CommentId");
 
                     b.HasIndex("PostId");
@@ -186,7 +184,7 @@ namespace Social.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Post", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.PostEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -212,7 +210,7 @@ namespace Social.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Profile", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ProfileEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -237,7 +235,7 @@ namespace Social.Migrations
                     b.ToTable("Profiles");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Subscription", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.SubscriptionEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -262,7 +260,7 @@ namespace Social.Migrations
                     b.ToTable("Subscriptions");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Vote", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.VoteEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -270,6 +268,12 @@ namespace Social.Migrations
 
                     b.Property<int>("Action")
                         .HasColumnType("int");
+
+                    b.Property<Guid?>("CommentEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PostEntityId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("TargetId")
                         .HasColumnType("uniqueidentifier");
@@ -285,7 +289,9 @@ namespace Social.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TargetId");
+                    b.HasIndex("CommentEntityId");
+
+                    b.HasIndex("PostEntityId");
 
                     b.HasIndex("UserId");
 
@@ -294,28 +300,32 @@ namespace Social.Migrations
 
             modelBuilder.Entity("Friendships", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", null)
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", null)
                         .WithMany()
                         .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", null)
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", null)
                         .WithMany()
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatMessage", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatMessageEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Chat", "Chat")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ChatEntity", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Sender")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ImageEntity", "Image")
+                        .WithMany()
+                        .HasForeignKey("ImageId");
+
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Sender")
                         .WithMany("Messages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -323,18 +333,20 @@ namespace Social.Migrations
 
                     b.Navigation("Chat");
 
+                    b.Navigation("Image");
+
                     b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatParticipants", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Chat", "Chat")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ChatEntity", "Chat")
                         .WithMany()
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Profile")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -345,15 +357,15 @@ namespace Social.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Comment", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.CommentEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Author")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Author")
                         .WithMany("Comments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Post", "Post")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.PostEntity", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -363,30 +375,26 @@ namespace Social.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Image", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ImageEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.ChatMessage", "ChatMessage")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ChatMessageEntity", "ChatMessage")
                         .WithMany()
                         .HasForeignKey("ChatMessageId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.ChatMessage", null)
-                        .WithOne("Image")
-                        .HasForeignKey("Social.Infrastructure.Persistens.Entities.Image", "ChatMessageMessageId");
-
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Comment", "Comment")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.CommentEntity", "Comment")
                         .WithMany("Images")
                         .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Post", "Post")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.PostEntity", "Post")
                         .WithMany("Images")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Profile")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Profile")
                         .WithOne("ProfilePic")
-                        .HasForeignKey("Social.Infrastructure.Persistens.Entities.Image", "ProfileId")
+                        .HasForeignKey("Social.Infrastructure.Persistens.Entities.ImageEntity", "ProfileId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ChatMessage");
@@ -398,9 +406,9 @@ namespace Social.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Post", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.PostEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Author")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Author")
                         .WithMany("Posts")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -409,15 +417,15 @@ namespace Social.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Subscription", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.SubscriptionEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Publisher")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Publisher")
                         .WithMany()
                         .HasForeignKey("PublisherId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "Subscriber")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "Subscriber")
                         .WithMany("Subscriptions")
                         .HasForeignKey("SubscriberId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -428,52 +436,38 @@ namespace Social.Migrations
                     b.Navigation("Subscriber");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Vote", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.VoteEntity", b =>
                 {
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Comment", "TargetComment")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.CommentEntity", null)
                         .WithMany("Votes")
-                        .HasForeignKey("TargetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CommentEntityId");
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Post", "TargetPost")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.PostEntity", null)
                         .WithMany("Votes")
-                        .HasForeignKey("TargetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PostEntityId");
 
-                    b.HasOne("Social.Infrastructure.Persistens.Entities.Profile", "User")
+                    b.HasOne("Social.Infrastructure.Persistens.Entities.ProfileEntity", "User")
                         .WithMany("Votes")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("TargetComment");
-
-                    b.Navigation("TargetPost");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Chat", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatEntity", b =>
                 {
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ChatMessage", b =>
-                {
-                    b.Navigation("Image")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Comment", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.CommentEntity", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Votes");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Post", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.PostEntity", b =>
                 {
                     b.Navigation("Comments");
 
@@ -482,7 +476,7 @@ namespace Social.Migrations
                     b.Navigation("Votes");
                 });
 
-            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.Profile", b =>
+            modelBuilder.Entity("Social.Infrastructure.Persistens.Entities.ProfileEntity", b =>
                 {
                     b.Navigation("Comments");
 

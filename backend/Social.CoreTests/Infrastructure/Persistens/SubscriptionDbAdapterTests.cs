@@ -117,5 +117,54 @@ namespace SocialCoreTests.Infrastructure.Persistens
             // Assert
             Assert.That(ex, Is.Not.Null, "DbUpdateException blev ikke kastet ved duplikat.");
         }
+
+        [Test]
+        public async Task GetSubscriptionsBySubscriberIdAsync_ShouldReturnCorrectSubscriptions()
+        {
+            // Arrange
+            await SeedProfilesAsync();
+
+            var anotherPublisher = new Profile("publisher2");
+            await _context.Profiles.AddAsync(
+                new ProfileEntity { Id = anotherPublisher.Id, Name = "publisher2" }
+            );
+            await _context.SaveChangesAsync();
+
+            // Opret to subscriptions for samme subscriber men forskellige publishers
+            var subscription1 = new Subscription(_subscriber, _publisher);
+            var subscription2 = new Subscription(_subscriber, anotherPublisher);
+
+            await _adapter.Add(subscription1);
+            await _adapter.Add(subscription2);
+
+            // Opret en subscription for en anden subscriber (som ikke skal med i resultatet)
+            var otherSubscriber = new Profile("otherSub");
+            await _context.Profiles.AddAsync(
+                new ProfileEntity { Id = otherSubscriber.Id, Name = "otherSub" }
+            );
+            await _context.SaveChangesAsync();
+
+            var otherSubscription = new Subscription(otherSubscriber, _publisher);
+            await _adapter.Add(otherSubscription);
+
+            // Act
+            var result = await _adapter.GetSubscriptionsBySubscriberIdAsync(_subscriber.Id);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var list = result.ToList();
+            Assert.That(
+                list.Count,
+                Is.EqualTo(2),
+                "Der burde kun returneres 2 subscriptions for denne subscriber."
+            );
+            Assert.That(
+                list.All(s => s.Subscriber.Id == _subscriber.Id),
+                Is.True,
+                "Alle subscriptions skal tilhøre samme subscriber."
+            );
+            Assert.That(list.Select(s => s.Publisher.Id), Does.Contain(_publisher.Id));
+            Assert.That(list.Select(s => s.Publisher.Id), Does.Contain(anotherPublisher.Id));
+        }
     }
 }

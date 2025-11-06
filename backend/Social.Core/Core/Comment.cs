@@ -29,6 +29,15 @@ namespace Social.Core
             _votes = votes;
         }
 
+        public Comment(Guid id, Guid authorId, string text, DateTime timeStamp, List<Vote> votes)
+        {
+            Id = id;
+            AuthorId = authorId;
+            Content = text;
+            Timestamp = timeStamp;
+            _votes = votes;
+        }
+
         public static Comment CreateNewComment(Guid authorId, string text)
         {
             return new Comment { AuthorId = authorId, Content = text };
@@ -47,7 +56,9 @@ namespace Social.Core
 
         public Vote AddVote(Guid userId, bool upvote)
         {
+            // Check if the user has already voted
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
+            // If they have, update or remove the vote
             if (vote != null)
             {
                 if (vote.Upvote != upvote)
@@ -63,11 +74,12 @@ namespace Social.Core
             }
             else
             {
+                // If they haven't, add a new vote
                 vote = new Vote
                 {
                     Id = Guid.NewGuid(),
                     TargetId = Id,
-                    VoteTargetType = VoteTargetType.Post,
+                    VoteTargetType = VoteTargetType.Comment,
                     UserId = userId,
                     Upvote = upvote,
                     Action = VoteAction.Add,
@@ -90,6 +102,7 @@ namespace Social.Core
 
         public bool? GetUserVote(Guid userId)
         {
+            // Returns true for upvote, false for downvote, null for no vote
             var vote = Votes.FirstOrDefault(v => v.UserId == userId);
             return vote?.Upvote;
         }

@@ -22,6 +22,7 @@
 
         public void AddImage(string fileName, string contentType, byte[] data)
         {
+            // Create a new Image object and assign it to the Image property
             Image = new Image(fileName, contentType, data);
         }
 

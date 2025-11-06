@@ -6,14 +6,14 @@ namespace Social.Social.Infrastructure.Notification
 {
     public class ChatHub : Hub, IChatNotifier
     {
-        public Task NotifyChatCreated(Chat chat)
+        public async Task NotifyChatCreated(Chat chat)
         {
-            throw new NotImplementedException();
+            await Clients.All.SendAsync("ChatCreated", chat);
         }
 
         public async Task NotifyMessageSent(ChatMessage message)
         {
-            throw new NotImplementedException();
+            await Clients.Group(message.ChatId.ToString()).SendAsync("MessageSent", message);
         }
     }
 }

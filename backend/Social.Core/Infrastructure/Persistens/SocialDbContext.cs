@@ -160,7 +160,7 @@ namespace Social.Infrastructure.Persistens.dbContexts
                 .HasOne(v => v.User)
                 .WithMany(p => p.Votes)
                 .HasForeignKey(v => v.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

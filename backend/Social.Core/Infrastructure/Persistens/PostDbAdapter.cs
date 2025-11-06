@@ -76,6 +76,19 @@ namespace Social.Infrastructure.Persistens
             return entity?.ToDomain();
         }
 
+        public async Task<IEnumerable<Post>> GetFeedByAuthorsAsync(IEnumerable<Guid> authorIds)
+        {
+            var entities = await _context
+                .Posts.Where(p => authorIds.Contains(p.AuthorId))
+                .Include(p => p.Comments)
+                .Include(p => p.Votes)
+                .Include(p => p.Images)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            return entities.Select(e => e.ToDomain()).ToList();
+        }
+
         // Update a post along with its comments, images, and votes
         public async Task UpdateAsync(Post post)
         {

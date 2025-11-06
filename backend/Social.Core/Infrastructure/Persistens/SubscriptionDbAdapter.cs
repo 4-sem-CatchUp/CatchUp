@@ -45,6 +45,28 @@ namespace Social.Infrastructure.Persistens
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Subscription>> GetAllSubscriptions()
+        {
+            var entities = await _context
+                .Subscriptions.Include(s => s.Subscriber)
+                .Include(s => s.Publisher)
+                .ToListAsync();
+            return entities.Select(e => e.ToDomain());
+        }
+
+        public async Task<IEnumerable<Subscription>> GetSubscriptionsBySubscriberIdAsync(
+            Guid subscriberId
+        )
+        {
+            var entities = await _context
+                .Subscriptions.Include(s => s.Subscriber)
+                .Include(s => s.Publisher)
+                .Where(s => s.SubscriberId == subscriberId)
+                .ToListAsync();
+
+            return entities.Select(e => e.ToDomain());
+        }
+
         public async Task Remove(Subscription subscription)
         {
             // Find the subscription entity by its ID

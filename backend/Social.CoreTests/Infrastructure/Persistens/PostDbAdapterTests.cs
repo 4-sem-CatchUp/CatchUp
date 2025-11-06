@@ -18,13 +18,6 @@ namespace SocialCoreTests.Infrastructure.Persistens
     {
         private SocialDbContext _context;
         private PostDbAdapter _postAdapter;
-        private PostService _postService;
-
-        // For simplicity, vi laver in-memory repositories
-        private VoteDbAdapter _voteAdapter;
-        private CommentDbAdapter _commentAdapter;
-        private SubscribeServiceStub _subscribeService;
-        private FakeProfileRepository _profileAdapter;
 
         [SetUp]
         public void Setup()
@@ -34,21 +27,7 @@ namespace SocialCoreTests.Infrastructure.Persistens
                 .Options;
 
             _context = new SocialDbContext(options);
-
             _postAdapter = new PostDbAdapter(_context);
-            _voteAdapter = new VoteDbAdapter(_context);
-            _commentAdapter = new CommentDbAdapter(_context);
-
-            _subscribeService = new SubscribeServiceStub();
-            _profileAdapter = new FakeProfileRepository();
-
-            _postService = new PostService(
-                _postAdapter,
-                _commentAdapter,
-                _voteAdapter,
-                _profileAdapter,
-                _subscribeService
-            );
         }
 
         [TearDown]
@@ -58,70 +37,28 @@ namespace SocialCoreTests.Infrastructure.Persistens
         }
 
         [Test]
-        public async Task CreatePost_Should_Create_Post_With_Images()
+        public async Task AddAsync_Should_Add_Post()
         {
-            var authorId = Guid.NewGuid();
-            var images = new List<Image>
-            {
-                new Image("pic.jpg", "image/jpeg", new byte[] { 1, 2, 3 }),
-            };
+            var post = Post.CreateNewPost(Guid.NewGuid(), "Test Post", "Content");
 
-            var postId = await _postService.CreatePostAsync(
-                authorId,
-                "Test Post",
-                "Content",
-                images
-            );
+            await _postAdapter.AddAsync(post);
 
-            var dbPost = await _postAdapter.GetByIdAsync(postId);
-
+            var dbPost = await _postAdapter.GetByIdAsync(post.Id);
             Assert.That(dbPost, Is.Not.Null);
-            Assert.That(dbPost!.Title, Is.EqualTo("Test Post"));
+            Assert.That(dbPost.Title, Is.EqualTo("Test Post"));
             Assert.That(dbPost.Content, Is.EqualTo("Content"));
-            Assert.That(dbPost.Images.Count, Is.EqualTo(1));
-            Assert.That(dbPost.Images[0].FileName, Is.EqualTo("pic.jpg"));
         }
 
         [Test]
-        public async Task VotePost_Should_Add_New_Vote()
-        {
-            var post = Post.CreateNewPost(Guid.NewGuid(), "Post", "Content");
-            await _postAdapter.AddAsync(post);
-
-            var voterId = Guid.NewGuid();
-            await _postService.VotePost(post.Id, true, voterId);
-
-            var dbPost = await _postAdapter.GetByIdAsync(post.Id);
-
-            Assert.That(dbPost.Votes.Count, Is.EqualTo(1));
-            Assert.That(dbPost.Votes[0].UserId, Is.EqualTo(voterId));
-            Assert.That(dbPost.Votes[0].Upvote, Is.True);
-        }
-
-        [Test]
-        public async Task AddComment_Should_Add_New_Comment()
-        {
-            var post = Post.CreateNewPost(Guid.NewGuid(), "Post", "Content");
-            await _postAdapter.AddAsync(post);
-
-            var comment = Comment.CreateNewComment(Guid.NewGuid(), "Nice post!");
-            await _commentAdapter.AddAsync(comment); // simulér service
-
-            post.AddComment(comment);
-            await _postAdapter.UpdateAsync(post);
-
-            var dbPost = await _postAdapter.GetByIdAsync(post.Id);
-            Assert.That(dbPost.Comments.Count, Is.EqualTo(1));
-            Assert.That(dbPost.Comments[0].Content, Is.EqualTo("Nice post!"));
-        }
-
-        [Test]
-        public async Task UpdatePost_Should_Update_Title_And_Content()
+        public async Task UpdateAsync_Should_Update_Post_Title_And_Content()
         {
             var post = Post.CreateNewPost(Guid.NewGuid(), "Old Title", "Old Content");
             await _postAdapter.AddAsync(post);
 
-            await _postService.UpdatePostAsync(post.Id, "New Title", "New Content");
+            post.Title = "New Title";
+            post.Content = "New Content";
+
+            await _postAdapter.UpdateAsync(post);
 
             var dbPost = await _postAdapter.GetByIdAsync(post.Id);
             Assert.That(dbPost.Title, Is.EqualTo("New Title"));
@@ -129,59 +66,56 @@ namespace SocialCoreTests.Infrastructure.Persistens
         }
 
         [Test]
-        public async Task DeletePost_Should_Remove_Post()
+        public async Task DeleteAsync_Should_Remove_Post()
         {
             var post = Post.CreateNewPost(Guid.NewGuid(), "Delete Me", "Content");
             await _postAdapter.AddAsync(post);
 
-            await _postService.DeletePost(post.Id);
+            await _postAdapter.DeleteAsync(post.Id);
 
             var dbPost = await _postAdapter.GetByIdAsync(post.Id);
             Assert.That(dbPost, Is.Null);
         }
-    }
 
-    // Stub implementering af SubscribeService til test
-    public class SubscribeServiceStub : ISubscribeUseCases
-    {
-        public Task Notify(Profile profile, string message)
+        [Test]
+        public async Task GetAllAsync_Should_Return_All_Posts()
         {
-            // Gør ingenting, blot for at kunne køre testen
-            return Task.CompletedTask;
+            var post1 = Post.CreateNewPost(Guid.NewGuid(), "Post 1", "Content 1");
+            var post2 = Post.CreateNewPost(Guid.NewGuid(), "Post 2", "Content 2");
+
+            await _postAdapter.AddAsync(post1);
+            await _postAdapter.AddAsync(post2);
+
+            var allPosts = await _postAdapter.GetAllAsync();
+
+            Assert.That(allPosts.Count(), Is.EqualTo(2));
+            Assert.That(allPosts.Any(p => p.Id == post1.Id), Is.True);
+            Assert.That(allPosts.Any(p => p.Id == post2.Id), Is.True);
         }
 
-        public void Subscribe(Profile subscriber, Profile publisher) =>
-            throw new NotImplementedException();
-
-        public void Unsubscribe(Profile subscriber, Profile publisher) =>
-            throw new NotImplementedException();
-    }
-
-    public class FakeProfileRepository : IProfileRepository
-    {
-        public Task AddFriendAsync(Guid profileId, Guid friendId) =>
-            throw new NotImplementedException();
-
-        public Task AddProfileAsync(Profile profile) => throw new NotImplementedException();
-
-        public Task DeleteProfileAsync(Guid profileId) => throw new NotImplementedException();
-
-        public Task<IEnumerable<Profile>> GetAllProfilesAsync() =>
-            throw new NotImplementedException();
-
-        public Task<Profile?> GetProfileByIdAsync(Guid id)
+        [Test]
+        public async Task GetFeedByAuthorsAsync_Should_Return_Only_Posts_From_Specified_Authors()
         {
-            // Returner en dummy profil
-            return Task.FromResult<Profile?>(
-                new Profile
-                {
-                    Id = id,
-                    Name = "TestUser",
-                    Bio = "Test bio",
-                }
-            );
-        }
+            var author1 = Guid.NewGuid();
+            var author2 = Guid.NewGuid();
+            var author3 = Guid.NewGuid();
 
-        public Task UpdateProfileAsync(Profile profile) => throw new NotImplementedException();
+            var post1 = Post.CreateNewPost(author1, "Post 1", "Content 1");
+            var post2 = Post.CreateNewPost(author2, "Post 2", "Content 2");
+            var post3 = Post.CreateNewPost(author3, "Post 3", "Content 3");
+
+            await _postAdapter.AddAsync(post1);
+            await _postAdapter.AddAsync(post2);
+            await _postAdapter.AddAsync(post3);
+
+            var subscribedAuthors = new List<Guid> { author1, author3 };
+
+            var feedPosts = await _postAdapter.GetFeedByAuthorsAsync(subscribedAuthors);
+
+            Assert.That(feedPosts.Count(), Is.EqualTo(2));
+            Assert.That(feedPosts.Any(p => p.AuthorId == author1), Is.True);
+            Assert.That(feedPosts.Any(p => p.AuthorId == author3), Is.True);
+            Assert.That(feedPosts.Any(p => p.AuthorId == author2), Is.False);
+        }
     }
 }

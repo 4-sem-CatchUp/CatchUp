@@ -9,5 +9,6 @@ namespace Social.Core.Ports.Outgoing
         Task AddAsync(Comment comment);
         Task UpdateAsync(Comment comment);
         Task DeleteAsync(Guid commentId);
+        Task<IReadOnlyList<Comment>> GetCommentsByIdAsync(Guid postId);
     }
 }

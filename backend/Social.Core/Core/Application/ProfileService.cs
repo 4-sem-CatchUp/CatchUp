@@ -13,9 +13,15 @@ namespace Social.Core.Application
             _profileRepository = profileRepository;
         }
 
-        public async Task<Guid> CreateProfileAsync(string userName)
+        public async Task<Guid> CreateProfileAsync(
+            string userName,
+            string? bio = null,
+            Image? pic = null
+        )
         {
             var profile = Profile.CreateNewProfile(userName);
+            profile.UpdateProfile(userName, bio, pic);
+
             await _profileRepository.AddProfileAsync(profile);
             return profile.Id;
         }
@@ -27,18 +33,22 @@ namespace Social.Core.Application
             string? bio
         )
         {
+            // Retrieve the profile
             var profile =
                 await _profileRepository.GetProfileByIdAsync(profileId)
                 ?? throw new InvalidOperationException("Profile not found");
+            // Update profile details
             profile.UpdateProfile(name, bio, profilePic);
             await _profileRepository.UpdateProfileAsync(profile);
         }
 
         public async Task AddFriendAsync(Guid profileId, Guid friendId)
         {
+            // Prevent adding oneself as a friend
             if (profileId == friendId)
                 throw new InvalidOperationException("You cannot add yourself as a friend.");
 
+            // Retrieve both profiles
             var profile =
                 await _profileRepository.GetProfileByIdAsync(profileId)
                 ?? throw new KeyNotFoundException("Profile not found");
@@ -47,8 +57,10 @@ namespace Social.Core.Application
                 await _profileRepository.GetProfileByIdAsync(friendId)
                 ?? throw new KeyNotFoundException("Friend not found");
 
+            // Add the friend relationship if not already friends
             profile.AddFriend(friendId);
 
+            // Update both profiles in the repository
             await _profileRepository.UpdateProfileAsync(profile);
         }
     }
