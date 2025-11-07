@@ -128,7 +128,6 @@ jobs:
           ls -R ./TestResults || echo "⚠️ No TestResults directory found!"
         continue-on-error: true
 
-
       # Debug step after tests
       - name: Check TestResults existence
         run: |
@@ -149,10 +148,10 @@ jobs:
           name: test_results
           path: backend/TestResults/test_results.trx
 
-
       # Search for coverage files
       - name: Find coverage files
         id: find_coverage
+
         run: |
           echo "Searching for coverage files..."
           files=$(find TestResults -type f -name "coverage.cobertura.xml" | tr '\n' ';')
@@ -163,6 +162,7 @@ jobs:
           fi
           echo "files=$files" >> $GITHUB_OUTPUT
 
+
       # Generate coverage report
       - name: Generate coverage report
         run: |
@@ -171,10 +171,12 @@ jobs:
           echo "Generating report for files: ${{ steps.find_coverage.outputs.files }}"
           reportgenerator \
             -reports:"${{ steps.find_coverage.outputs.files }}" \
+
             -targetdir:"coveragereport" \
             -reporttypes:"HtmlInline_AzurePipelines_Dark" \
             -classfilters:"+Social.*;-Social.Program;-Social.Migrations*" \
             -filefilters:"-**/Middleware/*"
+
 
       # Check if coverage report was generated
       - name: Verify coverage report
