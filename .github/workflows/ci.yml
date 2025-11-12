@@ -162,7 +162,6 @@ jobs:
           fi
           echo "files=$files" >> $GITHUB_OUTPUT
 
-
       # Generate coverage report
       - name: Generate coverage report
         run: |
@@ -176,7 +175,6 @@ jobs:
             -reporttypes:"HtmlInline_AzurePipelines_Dark" \
             -classfilters:"+Social.*;-Social.Program;-Social.Migrations*" \
             -filefilters:"-**/Middleware/*"
-
 
       # Check if coverage report was generated
       - name: Verify coverage report
