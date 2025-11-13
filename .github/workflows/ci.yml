@@ -170,7 +170,6 @@ jobs:
           echo "Generating report for files: ${{ steps.find_coverage.outputs.files }}"
           reportgenerator \
             -reports:"${{ steps.find_coverage.outputs.files }}" \
-
             -targetdir:"coveragereport" \
             -reporttypes:"HtmlInline_AzurePipelines_Dark" \
             -classfilters:"+Social.*;-Social.Program;-Social.Migrations*" \
