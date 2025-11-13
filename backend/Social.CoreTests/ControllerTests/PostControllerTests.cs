@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Social.Core;
 using Social.Core.Ports.Incomming;
@@ -12,14 +16,12 @@ namespace SocialCoreTests.ControllerTests
     {
         private Mock<IPostUseCases> _postUseCasesMock;
         private PostsController _controller;
-        private Mock<ILogger<PostsController>> _loggerMock;
 
         [SetUp]
         public void Setup()
         {
             _postUseCasesMock = new Mock<IPostUseCases>();
-            _loggerMock = new Mock<ILogger<PostsController>>();
-            _controller = new PostsController(_postUseCasesMock.Object, _loggerMock.Object);
+            _controller = new PostsController(_postUseCasesMock.Object);
         }
 
         [Test]
@@ -40,7 +42,7 @@ namespace SocialCoreTests.ControllerTests
             var result = await _controller.CreatePost(dto) as CreatedAtActionResult;
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.ActionName, Is.EqualTo(nameof(PostQueryController.GetPostById)));
+            Assert.That(result.ActionName, Is.EqualTo(nameof(PostsController.GetPostById)));
             Assert.That(result.RouteValues!["id"], Is.EqualTo(postId));
         }
 
@@ -74,7 +76,7 @@ namespace SocialCoreTests.ControllerTests
         public async Task VotePost_Returns_Ok()
         {
             var id = Guid.NewGuid();
-            var dto = new PostVoteDto { UserId = Guid.NewGuid(), UpVote = true };
+            var dto = new VoteDto { UserId = Guid.NewGuid(), UpVote = true };
 
             var result = await _controller.VotePost(id, dto) as OkResult;
 

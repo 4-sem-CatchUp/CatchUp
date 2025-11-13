@@ -1,0 +1,196 @@
+name: CatchUp CI (Frontend & Backend)
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  detect_changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  # --- FRONTEND TESTS ---
+  frontend_tests:
+    name: Frontend CI (React + Tailwind)
+    needs: detect_changes
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: frontend
+        run: npm test -- --run
+
+  # --- BACKEND TESTS ---
+  backend_tests:
+    name: Backend CI (.NET)
+    needs: detect_changes
+    if: needs.detect_changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+
+    defaults:
+        run:
+            working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+    
+      # Check working dir
+      - name: Print working directory
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+
+      # Cache NuGet packages
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore CatchUp.Social.sln
+
+      # Restore local dotnet tools
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      # Build
+      - name: Build solution
+        run: dotnet build CatchUp.Social.sln --configuration Release
+
+      # Check formatting
+      - name: Check formatting with CSharpier
+        run: dotnet csharpier check .
+
+      # Run linting
+      - name: Run linting (dotnet format)
+        run: dotnet format --verify-no-changes --severity error
+
+      # Debug step before tests
+      - name: Check directory before running tests
+        run: |
+          echo "Pre-test working directory: $(pwd)"
+          echo "Files in backend directory before tests:"
+          ls -la
+
+      # Run unit tests with coverage
+      - name: Run unit tests with coverage
+        run: |
+          dotnet test Social.CoreTests/SocialCoreTests.csproj \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --logger "trx;LogFileName=test_results.trx" \
+            --verbosity normal
+
+          echo "Tests finished. TestResults content:"
+          ls -R ./TestResults || echo "⚠️ No TestResults directory found!"
+        continue-on-error: true
+
+      # Debug step after tests
+      - name: Check TestResults existence
+        run: |
+          echo "Checking if TestResults folder exists:"
+          if [ -d "TestResults" ]; then
+            echo "✅ TestResults directory found!"
+            find TestResults -type f -name "coverage.cobertura.xml"
+          else
+            echo "❌ TestResults directory not found!"
+            exit 1
+          fi
+          
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_results
+          path: backend/TestResults/test_results.trx
+
+      # Search for coverage files
+      - name: Find coverage files
+        id: find_coverage
+
+        run: |
+          echo "Searching for coverage files..."
+          files=$(find TestResults -type f -name "coverage.cobertura.xml" | tr '\n' ';')
+          echo "Found files: $files"
+          if [ -z "$files" ]; then
+            echo "❌ No coverage files found!"
+            exit 1
+          fi
+          echo "files=$files" >> $GITHUB_OUTPUT
+
+      # Generate coverage report
+      - name: Generate coverage report
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          echo "Generating report for files: ${{ steps.find_coverage.outputs.files }}"
+          reportgenerator \
+            -reports:"${{ steps.find_coverage.outputs.files }}" \
+            -targetdir:"coveragereport" \
+            -reporttypes:"HtmlInline_AzurePipelines_Dark" \
+            -classfilters:"+Social.*;-Social.Program;-Social.Migrations*" \
+            -filefilters:"-**/Middleware/*"
+
+      # Check if coverage report was generated
+      - name: Verify coverage report
+        run: |
+          echo "Checking if report was generated:"
+          if [ -d "coveragereport" ]; then
+            echo "✅ Report directory exists!"
+            ls -R coveragereport || true
+          else
+            echo "❌ Report directory missing!"
+            exit 1
+          fi
+
+      # Upload coverage report
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/coveragereport
