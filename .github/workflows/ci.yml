@@ -216,7 +216,7 @@ jobs:
           IMAGE_TAG=$(echo "$IMAGE_TAG" | xargs)
           FULL_IMAGE_NAME="${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG"
           echo "Full docker image name: $FULL_IMAGE_NAME"
-          docker build -t ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG ./backend
+          docker build -t ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG ./Social.Core
           docker push ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
