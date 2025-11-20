@@ -194,3 +194,34 @@ jobs:
         with:
           name: coverage-report
           path: backend/coveragereport
+
+      # Docker login
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build and push Docker image
+      - name: Build and push backend Docker image
+        run: |
+          echo "Determining Docker image tag..."
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            IMAGE_TAG="latest"
+          else
+            # Fjern refs/heads/ og erstat ulovlige tegn (fx /, mellemrum) med -
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            IMAGE_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          fi
+          IMAGE_TAG=$(echo "$IMAGE_TAG" | xargs)
+          FULL_IMAGE_NAME="${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG"
+          echo "Full docker image name: $FULL_IMAGE_NAME"
+          docker build -t ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG .
+          docker push ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Docker logout
+      - name: Log out from Docker Hub
+        run: docker logout
