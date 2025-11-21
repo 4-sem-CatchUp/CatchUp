@@ -1,5 +1,4 @@
-name: CatchUp CI (Frontend & Backend)
-
+name: CatchUp CI
 on:
   push:
     branches: ["**"]
@@ -126,7 +125,7 @@ jobs:
 
           echo "Tests finished. TestResults content:"
           ls -R ./TestResults || echo "⚠️ No TestResults directory found!"
-        continue-on-error: true
+#        continue-on-error: true
 
       # Debug step after tests
       - name: Check TestResults existence
@@ -225,3 +224,11 @@ jobs:
       # Docker logout
       - name: Log out from Docker Hub
         run: docker logout
+
+      # Trigger CD workflow
+      - name: Trigger CD workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: cd.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: DeploymentPipeline

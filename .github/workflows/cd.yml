@@ -1,0 +1,39 @@
+name: CatchUp CD (Backend)
+
+on:
+  workflow_run:
+    workflows: ["CatchUp CI"]
+    types:
+      - completed
+
+jobs:
+  deploy_backend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy Backend to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start Tailscale VPN
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          tags: tag:ci
+          ping: hjemmeserver.taile4ff41.ts.net
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: SSH to server and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "Connected to server. Deploying backend..."  
+            cd /home/catchup
+            docker-compose down
+            docker-compose up -d --build
+            echo "Backend deployed successfully."
+          EOF
