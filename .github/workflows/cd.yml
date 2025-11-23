@@ -1,4 +1,4 @@
-name: CatchUp CD (Backend)
+name: CatchUp CD
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
 
 jobs:
   deploy_backend:
-#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: github.event.workflow_run.head_branch == 'main'
     name: Deploy Backend to Production
     runs-on: ubuntu-latest
 
@@ -62,4 +62,12 @@ jobs:
       # Notify deployment success
       - name: Notify Deployment Success
         run: echo "Backend deployed successfully to production server."
+
+      # Stop Tailscale VPN
+      - name: Stop Tailscale VPN
+        run: sudo tailscale down
+
+      # end of deploy_backend job
+
+
 

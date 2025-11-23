@@ -352,6 +352,7 @@ jobs:
     name: CI Pipeline Complete
     needs: [backend_docker, frontend_docker]
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.head_branch == 'main'
     steps:
       - name: CI Complete Notification
         run: echo "✅ CI Pipeline completed successfully."
