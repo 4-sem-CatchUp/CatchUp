@@ -363,3 +363,4 @@ jobs:
           repo: ${{ github.repository }}
           ref: DeploymentPipeline
           inputs: '{"ci_workflow_run_id": "${{ github.run_id }}", "ci_conclusion": "success"}'
+          token: ${{ secrets.CD_DISPATCH_TOKEN}}

@@ -2,6 +2,13 @@ name: CatchUp CD (Backend)
 
 on:
   workflow_dispatch:
+    inputs:
+      ci_workflow_run_id:
+        description: 'CI Workflow Run ID'
+        required: true
+      ci_conclusion:
+        description: 'CI Workflow Conclusion'
+        required: true
   workflow_run:
     workflows: [200233247]
     types: [completed]
@@ -9,7 +16,7 @@ on:
 
 jobs:
   deploy_backend:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Deploy Backend to Production
     runs-on: ubuntu-latest
 
