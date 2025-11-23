@@ -1,6 +1,7 @@
 name: CatchUp CD (Backend)
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [200233247] # Catchup CI workflow ID
     types:
