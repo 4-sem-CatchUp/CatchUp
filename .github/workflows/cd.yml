@@ -1,10 +1,13 @@
 name: CatchUp CD (Backend)
 
 on:
-  workflow_run:
-    workflows: [200233247] # Catchup CI workflow ID
-    types:
-      - completed
+#  workflow_run:
+#    workflows: [200233247] # Catchup CI workflow ID
+#    types:
+#      - completed
+  push:
+    branches:
+      - DeploymentPipeline
 
 jobs:
   deploy_backend:
