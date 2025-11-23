@@ -2,7 +2,7 @@ name: CatchUp CD (Backend)
 
 on:
   workflow_run:
-    workflows: ["CatchUp CI"]
+    workflows: [200233247] # Catchup CI workflow ID
     types:
       - completed
 
@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Set up Tailscale VPN
       - name: Start Tailscale VPN
         uses: tailscale/github-action@v4
         with:
@@ -23,11 +25,22 @@ jobs:
           tags: tag:ci
           ping: hjemmeserver.taile4ff41.ts.net
 
+      # Test tailscale connection
+      - name: Test Tailscale connection
+        run: |
+          ping -c 4 hjemmeserver.taile4ff41.ts.net
+          echo "tailscale status:
+            $(tailscale status)"
+          echo "tailscale ip:
+            $(tailscale ip -4)"
+
+      # Deploy backend via SSH
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # Update docker containers on the server
       - name: SSH to server and deploy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
@@ -37,3 +50,8 @@ jobs:
             docker-compose up -d --build
             echo "Backend deployed successfully."
           EOF
+
+      # Notify deployment success
+      - name: Notify Deployment Success
+        run: echo "Backend deployed successfully to production server."
+
