@@ -1,5 +1,4 @@
-name: CatchUp CI (Frontend & Backend)
-
+name: CatchUp CI
 on:
   push:
     branches: ["**"]
@@ -14,6 +13,14 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }}
       backend_changed: ${{ steps.filter.outputs.backend }}
     steps:
+      - name: Get workflow event info
+        run: |
+          echo "Event name: $GITHUB_EVENT_NAME"
+          echo "Event path: $GITHUB_EVENT_PATH"
+          echo "Event content:"
+          cat $GITHUB_EVENT_PATH
+          echo "Workflow id: ${{github.run_id}}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -126,7 +133,7 @@ jobs:
 
           echo "Tests finished. TestResults content:"
           ls -R ./TestResults || echo "⚠️ No TestResults directory found!"
-        continue-on-error: true
+#        continue-on-error: true
 
       # Debug step after tests
       - name: Check TestResults existence
@@ -195,6 +202,35 @@ jobs:
           name: coverage-report
           path: backend/coveragereport
 
+  # --- BACKEND DOCKER BUILD & PUSH ---
+  backend_docker:
+    name: Backend Docker Build & Push
+    needs: [detect_changes, backend_tests]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: backend
+    steps:
+
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Determinate IMAGE_TAG and expose as output
+      - name: Determine backend image tag
+        id: vars
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            IMAGE_TAG="latest"
+          else
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            IMAGE_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          fi
+
+          echo "Using image tag: $IMAGE_TAG"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+        
       # Docker login
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -205,23 +241,127 @@ jobs:
       # Build and push Docker image
       - name: Build and push backend Docker image
         run: |
-          echo "Determining Docker image tag..."
-          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-            IMAGE_TAG="latest"
-          else
-            # Fjern refs/heads/ og erstat ulovlige tegn (fx /, mellemrum) med -
-            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-            IMAGE_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
-          fi
-          IMAGE_TAG=$(echo "$IMAGE_TAG" | xargs)
-          FULL_IMAGE_NAME="${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG"
-          echo "Full docker image name: $FULL_IMAGE_NAME"
-          docker build -t ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG .
-          docker push ${DOCKER_USERNAME}/catchup-backend:$IMAGE_TAG
+          docker build -t ${DOCKER_USERNAME}/catchup-backend:${{ steps.vars.outputs.IMAGE_TAG }} .
+          docker push ${DOCKER_USERNAME}/catchup-backend:${{ steps.vars.outputs.IMAGE_TAG }}
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Test the pushed Docker image
+      - name: Test backend container
+        run: |
+          echo "Starting backend container..."
+          container_id=$(docker run -d -p 5000:80 ${DOCKER_USERNAME}/catchup-backend:${{ steps.vars.outputs.IMAGE_TAG }})
+          
+          # Vent et par sekunder for at container starter
+          sleep 5
+          
+          # Check HTTP response (eller port åben)
+          if nc -z localhost 5000; then
+            echo "✅ Backend container is running!"
+          else
+            echo "❌ Backend container did not start!"
+            docker logs $container_id
+            exit 1
+          fi
+          
+          # Stop container
+          docker stop $container_id
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+
       # Docker logout
       - name: Log out from Docker Hub
         run: docker logout
+
+   # --- FRONTEND DOCKER BUILD & PUSH ---
+  frontend_docker:
+    name: Frontend Docker Build & Push
+    needs: [detect_changes, frontend_tests]
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+            working-directory: frontend
+    steps:
+
+      # Repository checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Determinate IMAGE_TAG and expose as output
+      - name: Determine frontend image tag
+        id: vars
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            IMAGE_TAG="latest"
+          else
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            IMAGE_TAG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          fi
+
+          echo "Using image tag: $IMAGE_TAG"
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Docker login
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build and push Docker image
+      - name: Build and push frontend Docker image
+        run: |
+          docker build -t ${DOCKER_USERNAME}/catchup-frontend:${{ steps.vars.outputs.IMAGE_TAG }} .
+          docker push ${DOCKER_USERNAME}/catchup-frontend:${{ steps.vars.outputs.IMAGE_TAG }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      # Test the pushed Docker image
+      - name: Test pushed frontend Docker image
+        run: |
+          echo "Testing frontend image..."
+          # Kør container i baggrunden
+          container_id=$(docker run -d -p 8080:80 ${DOCKER_USERNAME}/catchup-frontend:${{ steps.vars.outputs.IMAGE_TAG }})
+          
+          # Vent et par sekunder for at sikre nginx starter
+          sleep 5
+          
+          # Tjek at nginx serverer noget
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
+          
+          if [ "$status_code" -eq 200 ]; then
+            echo "✅ Frontend container test succeeded!"
+          else
+            echo "❌ Frontend container test failed!"
+            exit 1
+          fi
+          
+          # Stop container
+          docker stop $container_id
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+      # Docker logout
+      - name: Log out from Docker Hub
+        run: docker logout
+
+  ci_pipeline_complete:
+    name: CI Pipeline Complete
+    needs: [backend_docker, frontend_docker]
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.head_branch == 'main'
+    steps:
+      - name: CI Complete Notification
+        run: echo "✅ CI Pipeline completed successfully."
+      # Trigger CD workflow
+      - name: Trigger CD Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: cd.yml
+          repo: ${{ github.repository }}
+          ref: DeploymentPipeline
+          inputs: '{"ci_workflow_run_id": "${{ github.run_id }}", "ci_conclusion": "success"}'
+          token: ${{ secrets.CD_DISPATCH_TOKEN}}
