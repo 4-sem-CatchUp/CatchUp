@@ -15,8 +15,6 @@ namespace Social.Infrastructure.Persistens
             _context = context;
         }
 
-
-
         public async Task AddFriendAsync(Guid profileId, Guid friendId)
         {
             // Fetch the profile along with its friends
