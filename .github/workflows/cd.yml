@@ -53,7 +53,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             echo "Connected to server. Deploying backend..."  
-            cd /home/catchup
+            cd catchup
             docker-compose down
             docker-compose up -d --build
             echo "Backend deployed successfully."
