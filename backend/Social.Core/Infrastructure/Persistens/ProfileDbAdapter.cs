@@ -15,6 +15,8 @@ namespace Social.Infrastructure.Persistens
             _context = context;
         }
 
+
+
         public async Task AddFriendAsync(Guid profileId, Guid friendId)
         {
             // Fetch the profile along with its friends
@@ -92,6 +94,17 @@ namespace Social.Infrastructure.Persistens
                 .Profiles.Include(p => p.Friends)
                 .Include(p => p.ProfilePic)
                 .FirstOrDefaultAsync(p => p.Id == profileId);
+
+            return entity?.ToDomain();
+        }
+
+        public async Task<Profile?> GetProfileByUserNameAsync(string username)
+        {
+            var entity = await _context
+                .Profiles
+                .Include(p => p.Friends)
+                .Include(p => p.ProfilePic)
+                .FirstOrDefaultAsync(p => p.Name.ToLower() == username.ToLower());
 
             return entity?.ToDomain();
         }
