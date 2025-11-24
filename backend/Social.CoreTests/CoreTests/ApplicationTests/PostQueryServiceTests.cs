@@ -160,6 +160,7 @@ namespace SocialCoreTests.CoreTests.ApplicationTests
         public Task UpdateProfileAsync(Profile profile) => Task.CompletedTask;
 
         public Task AddFriendAsync(Guid profileId, Guid friendId) => Task.CompletedTask;
+
         public Task<Profile?> GetProfileByUserNameAsync(string username)
         {
             // Return whatever you're testing for
