@@ -11,11 +11,11 @@ namespace Social.Infrastructure.Adapters.Incomming
     public class ProfilesController : ControllerBase
     {
         private readonly IProfileUseCases _profileUseCases;
-        private readonly ILogger _logger;
+        private readonly ILogger<ProfilesController> _logger;
         private readonly IProfileRepository _profileRepository;
 
         public ProfilesController(
-            ILogger logger,
+            ILogger<ProfilesController> logger,
             IProfileUseCases profileUseCases,
             IProfileRepository profileRepository
         )
@@ -23,6 +23,19 @@ namespace Social.Infrastructure.Adapters.Incomming
             _profileUseCases = profileUseCases;
             _logger = logger;
             _profileRepository = profileRepository;
+        }
+
+        [HttpGet("/api/profile/{username}")]
+        public async Task<IActionResult> GetProfileByUsername(string username)
+        {
+            _logger.LogInformation("Fetching profile for username: {UserName}", username);
+
+            var profile = await _profileRepository.GetProfileByUserNameAsync(username);
+
+            if (profile == null)
+                return NotFound();
+
+            return Ok(profile);
         }
 
         [HttpPost]

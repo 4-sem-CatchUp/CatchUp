@@ -10,5 +10,6 @@ namespace Social.Core.Ports.Outgoing
         Task DeleteProfileAsync(Guid profileId);
         Task AddFriendAsync(Guid profileId, Guid friendId);
         Task<IEnumerable<Profile>> GetAllProfilesAsync();
+        Task<Profile?> GetProfileByUserNameAsync(string username);
     }
 }
