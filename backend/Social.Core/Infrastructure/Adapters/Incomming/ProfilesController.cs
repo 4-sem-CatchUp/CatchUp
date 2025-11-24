@@ -11,11 +11,11 @@ namespace Social.Infrastructure.Adapters.Incomming
     public class ProfilesController : ControllerBase
     {
         private readonly IProfileUseCases _profileUseCases;
-        private readonly ILogger _logger;
+        private readonly ILogger<ProfilesController> _logger;
         private readonly IProfileRepository _profileRepository;
 
         public ProfilesController(
-            ILogger logger,
+            ILogger<ProfilesController> logger,
             IProfileUseCases profileUseCases,
             IProfileRepository profileRepository
         )
