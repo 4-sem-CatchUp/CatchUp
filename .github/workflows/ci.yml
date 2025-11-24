@@ -350,7 +350,6 @@ jobs:
 
   ci_pipeline_complete:
     name: CI Pipeline Complete
-    needs: [backend_docker, frontend_docker]
     runs-on: ubuntu-latest
     if: >
       (needs.backend_docker.result == 'success' || needs.frontend_docker.result == 'success') &&
