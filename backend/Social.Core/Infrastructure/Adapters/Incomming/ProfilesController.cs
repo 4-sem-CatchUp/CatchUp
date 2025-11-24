@@ -25,6 +25,19 @@ namespace Social.Infrastructure.Adapters.Incomming
             _profileRepository = profileRepository;
         }
 
+        [HttpGet("/api/profile/{username}")]
+        public async Task<IActionResult> GetProfileByUsername(string username)
+        {
+            _logger.LogInformation("Fetching profile for username: {UserName}", username);
+
+            var profile = await _profileRepository.GetProfileByUserNameAsync(username);
+
+            if (profile == null)
+                return NotFound();
+
+            return Ok(profile);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateProfile([FromBody] CreateProfileRequest request)
         {

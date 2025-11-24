@@ -96,6 +96,16 @@ namespace Social.Infrastructure.Persistens
             return entity?.ToDomain();
         }
 
+        public async Task<Profile?> GetProfileByUserNameAsync(string username)
+        {
+            var entity = await _context
+                .Profiles.Include(p => p.Friends)
+                .Include(p => p.ProfilePic)
+                .FirstOrDefaultAsync(p => p.Name.ToLower() == username.ToLower());
+
+            return entity?.ToDomain();
+        }
+
         public async Task UpdateProfileAsync(Profile profile)
         {
             // Fetch the existing profile entity
