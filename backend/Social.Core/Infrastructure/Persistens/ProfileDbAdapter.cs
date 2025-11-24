@@ -99,8 +99,7 @@ namespace Social.Infrastructure.Persistens
         public async Task<Profile?> GetProfileByUserNameAsync(string username)
         {
             var entity = await _context
-                .Profiles
-                .Include(p => p.Friends)
+                .Profiles.Include(p => p.Friends)
                 .Include(p => p.ProfilePic)
                 .FirstOrDefaultAsync(p => p.Name.ToLower() == username.ToLower());
 
