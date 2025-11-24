@@ -348,13 +348,29 @@ jobs:
       - name: Log out from Docker Hub
         run: docker logout
 
-  ci_pipeline_complete:
+  ci_Frontend_pipeline_complete:
     name: CI Pipeline Complete
-    needs: [backend_docker, frontend_docker]
+    needs: [frontend_docker]
     runs-on: ubuntu-latest
-    if: >
-      (needs.backend_docker.result == 'success' || needs.frontend_docker.result == 'success') &&
-      github.event.workflow_run.head_branch == 'main'
+    if: github.event.workflow_run.head_branch == 'main'
+    steps:
+      - name: CI Complete Notification
+        run: echo "✅ CI Pipeline completed successfully."
+      # Trigger CD workflow
+      - name: Trigger CD Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: cd.yml
+          repo: ${{ github.repository }}
+          ref: DeploymentPipeline
+          inputs: '{"ci_workflow_run_id": "${{ github.run_id }}", "ci_conclusion": "success"}'
+          token: ${{ secrets.CD_DISPATCH_TOKEN}}
+
+  ci_Backend_pipeline_complete:
+    name: CI Pipeline Complete
+    needs: [backend_docker]
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.head_branch == 'main'
     steps:
       - name: CI Complete Notification
         run: echo "✅ CI Pipeline completed successfully."
