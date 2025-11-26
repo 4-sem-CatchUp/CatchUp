@@ -26,7 +26,7 @@ namespace Social
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(
-                    "AllowFrontend", 
+                    "AllowFrontend",
                     policy =>
                 {
                     policy
