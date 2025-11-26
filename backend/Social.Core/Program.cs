@@ -27,13 +27,14 @@ namespace Social
             {
                 options.AddPolicy(
                     "AllowFrontend",
-                policy =>
-                {
-                    policy
-                        .WithOrigins("http://localhost:5173")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
+                    policy =>
+                    {
+                        policy
+                            .WithOrigins("http://localhost:5173")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    }
+                );
             });
 
             builder.Services.AddSignalR();
