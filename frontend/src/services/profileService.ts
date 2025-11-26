@@ -4,7 +4,7 @@ import { Profile, Achievement, Comment, Activity } from '@/types/types';
 const BASE_URL = '/api';
 
 export async function getProfile(username: string, signal: AbortSignal): Promise<Profile> {
-  const res = await fetch(`${BASE_URL}/profile/${encodeURIComponent(username)}`, { signal });
+  const res = await fetch(`http://localhost:5032/api/profile/${encodeURIComponent(username)}`, { signal });
   if (!res.ok) throw new Error(`Profile fetch failed: ${res.status} ${res.statusText}`);
   return res.json();
 }

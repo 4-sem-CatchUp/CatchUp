@@ -22,6 +22,21 @@ namespace Social
             builder.Logging.AddConsole();
 
             // Add services to the container.
+            //CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    "AllowFrontend",
+                    policy =>
+                    {
+                        policy
+                            .WithOrigins("http://localhost:5173")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    }
+                );
+            });
+
             builder.Services.AddSignalR();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -80,6 +95,7 @@ namespace Social
             app.MapHub<NotificationHub>("/notificationHub");
             app.MapHub<ChatHub>("/chatHub");
 
+            app.UseCors("AllowFrontend");
             app.MapControllers();
 
             app.Run();

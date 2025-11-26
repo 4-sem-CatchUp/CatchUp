@@ -46,7 +46,7 @@ describe('profileService API wrappers', () => {
   describe('getProfile', () => {
     test('calls correct URL and returns parsed Profile on success', async () => {
       const username = 'alice';
-      const expected: Profile = { username: 'alice' } as unknown as Profile;
+      const expected: Profile = { username: 'bo' } as unknown as Profile;
       mockFetchOnce({ json: async () => expected });
 
       const ac = new AbortController();
@@ -211,7 +211,7 @@ describe('profileService API wrappers', () => {
       const ac = new AbortController();
       await getProfile('', ac.signal);
 
-      const [url] = (globalThis.fetch as Mock).mock.calls[0] as [string, RequestInit]; 
+      const [url] = (globalThis.fetch as Mock).mock.calls[0] as [string, RequestInit];
       expect(url).toBe('/api/profile/');
     });
 

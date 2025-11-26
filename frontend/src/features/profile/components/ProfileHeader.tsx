@@ -34,14 +34,14 @@ export default function ProfileHeader() {
                           rounded-xl bg-gray-200 dark:bg-gray-800 
                           text-gray-500 dark:text-gray-400"
         >
-          <FontAwesomeIcon icon={faUser} size="5x" />
+          {/* <img src={profile.id} alt="" /> */}
         </div>
         <div className="md:col-span-4 space-y-6">
-          <p className="mt-2">Bio section for {profile.name}</p>
+          <p className="mt-2">{profile.bio}</p>
         </div>
         <div className="md:col-span-1 space-y-3">
           <h2 className="">
-            Rank {profile.rank}
+            Rank {Math.floor(Math.random() * 100 + 1)}
             <FontAwesomeIcon icon={faMedal} className="inline-block ml-1 text-yellow-500" />
           </h2>
           {/* <DefaultButton text="Edit Profile" icon={<FontAwesomeIcon icon={faGear} size="xs" />} />
