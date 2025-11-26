@@ -1,18 +1,18 @@
 // src/mocks/handlers.js
 import { http, HttpResponse } from 'msw';
 
-function createProfile(username: string) {
-  return {
-    username,
-    name: username.charAt(0).toUpperCase() + username.slice(1),
-    bio: `This is a short bio for ${username}.`,
-    rank: Math.floor(Math.random() * 100) + 1,
-    achievements: [
-      { id: 1, title: 'First Post', date: '2024-06-01' },
-      { id: 2, title: '100 Comments', date: '2024-07-15' },
-    ],
-  };
-}
+// function createProfile(username: string) {
+//   return {
+//     username,
+//     name: username.charAt(0).toUpperCase() + username.slice(1),
+//     bio: `This is a short bio for ${username}.`,
+//     rank: Math.floor(Math.random() * 100) + 1,
+//     achievements: [
+//       { id: 1, title: 'First Post', date: '2024-06-01' },
+//       { id: 2, title: '100 Comments', date: '2024-07-15' },
+//     ],
+//   };
+// }
 
 function createAchievement() {
   return [
