@@ -1,6 +1,6 @@
 //import DefaultButton from '../../../components/ui/DefaultButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faMedal, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { faMedal, faCircle } from '@fortawesome/free-solid-svg-icons';
 import Card from '../../../components/ui/Card';
 import { useParams } from 'react-router-dom';
 import { useProfileQuery } from '../api/index';
@@ -34,7 +34,7 @@ export default function ProfileHeader() {
                           rounded-xl bg-gray-200 dark:bg-gray-800 
                           text-gray-500 dark:text-gray-400"
         >
-          {/* <img src={profile.id} alt="" /> */}
+          <img className="object-cover" src={`/src/assets/images/${profile.name}.png`} alt="" />
         </div>
         <div className="md:col-span-4 space-y-6">
           <p className="mt-2">{profile.bio}</p>
