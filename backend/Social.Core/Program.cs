@@ -25,7 +25,9 @@ namespace Social
             //CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontend", policy =>
+                options.AddPolicy(
+                    "AllowFrontend", 
+                    policy =>
                 {
                     policy
                         .WithOrigins("http://localhost:5173")
