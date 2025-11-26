@@ -27,7 +27,7 @@ namespace Social
             {
                 options.AddPolicy(
                     "AllowFrontend",
-                    policy =>
+                policy =>
                 {
                     policy
                         .WithOrigins("http://localhost:5173")
