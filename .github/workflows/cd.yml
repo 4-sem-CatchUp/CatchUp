@@ -16,7 +16,7 @@ on:
 
 jobs:
   deploy_backend:
-    if: github.event.workflow_run.head_branch == 'main'
+    # if: github.event.workflow_run.head_branch == 'main'
     name: Deploy Backend to Production
     runs-on: ubuntu-latest
 

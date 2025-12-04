@@ -10,7 +10,7 @@ jobs:
     name: Detect changed areas
     runs-on: ubuntu-latest
     outputs:
-      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      frontend_changed: ${{ steps.force_frontend.outputs.frontend }}
       backend_changed: ${{ steps.filter.outputs.backend }}
     steps:
       - name: Get workflow event info
@@ -33,6 +33,12 @@ jobs:
               - 'frontend/**'
             backend:
               - 'backend/**'
+
+      # For presentation purposes, set changes as frontend
+      - name: Force frontend changes (for testing)
+        id:  force_frontend
+        run: echo "frontend=true" >> $GITHUB_OUTPUT
+
 
   # --- FRONTEND TESTS ---
   frontend_tests:
@@ -352,7 +358,7 @@ jobs:
     name: CI Pipeline Complete
     needs: [frontend_docker]
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.head_branch == 'main'
+    # if: github.event.workflow_run.head_branch == 'main'
     steps:
       - name: CI Complete Notification
         run: echo "✅ CI Pipeline completed successfully."
@@ -370,7 +376,7 @@ jobs:
     name: CI Pipeline Complete
     needs: [backend_docker]
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.head_branch == 'main'
+    # if: github.event.workflow_run.head_branch == 'main'
     steps:
       - name: CI Complete Notification
         run: echo "✅ CI Pipeline completed successfully."
