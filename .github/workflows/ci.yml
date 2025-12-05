@@ -10,8 +10,8 @@ jobs:
     name: Detect changed areas
     runs-on: ubuntu-latest
     outputs:
-      frontend_changed: ${{ steps.force_frontend.outputs.frontend }}
-      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.force_backend.outputs.backend }}
     steps:
       - name: Get workflow event info
         run: |
@@ -34,10 +34,10 @@ jobs:
             backend:
               - 'backend/**'
 
-      # For presentation purposes, set changes as frontend
-      - name: Force frontend changes (for testing)
-        id:  force_frontend
-        run: echo "frontend=true" >> $GITHUB_OUTPUT
+      # For presentation purposes, set changes as backend
+      - name: Force backend changes (for testing)
+        id:  force_backend
+        run: echo "backend=true" >> $GITHUB_OUTPUT
 
 
   # --- FRONTEND TESTS ---
